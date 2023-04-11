@@ -41,7 +41,7 @@ def main(github_context: str):
         previous_commit = get_previous_commit(get_tag_commit(github_obj))
         logging.info(f"Previous commit: {previous_commit}")
 
-        release_branch_name = f'{RELEASE_BRANCH_PREFIX}0' if major_for_release_tag == '' else f'{RELEASE_BRANCH_PREFIX}{major_for_release_tag}'
+        release_branch_name = f'{RELEASE_BRANCH_PREFIX}0' if major_for_release_tag == '' else f'{RELEASE_BRANCH_PREFIX}{int(major_for_release_tag) - 1}'
         logging.info(f"Release branch to create: {release_branch_name}")
 
         if does_branch_exists(release_branch_name):
