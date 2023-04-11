@@ -80,7 +80,7 @@ Releaser GitHub Action
     publish:
       runs-on: ubuntu-latest
       steps:
-        - uses: cloudposse/github-action-releaser@initial
+        - uses: cloudposse/github-action-releaser@v1
           with:
             log-level: INFO
 ```
