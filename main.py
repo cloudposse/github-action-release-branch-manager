@@ -15,8 +15,8 @@ class ReleaserError(Exception):
         super().__init__(message)
 
 
-def main(github_object: str):
-    github_obj = deserialize_github_object(github_object)
+def main(github_context: str):
+    github_obj = deserialize_github_object(github_context)
     logging.debug(f"GitHub object: {github_obj}")
 
     validate_github_object(github_obj)
@@ -155,22 +155,22 @@ def get_major(version: str) -> str:
 
 
 @click.command()
-@click.option('--github-object',
+@click.option('--github-context',
               required=True,
-              help="Complete GitHub object serialized as JSON")
+              help="Complete GitHub context object serialized as JSON")
 @click.option('--log-level',
               default='INFO',
               show_default=True,
               required=True,
               help="Log Level: [CRITICAL|ERROR|WARNING|INFO|DEBUG]")
-def cli_main(github_object: str,
+def cli_main(github_context: str,
              log_level: str):
     logging.basicConfig(format='[%(asctime)s] %(levelname)-7s %(message)s',
                         datefmt='%d-%m-%Y %H:%M:%S',
                         level=logging.getLevelName(log_level))
 
     try:
-        main(github_object)
+        main(github_context)
     except ReleaserError as e:
         logging.error(e)
         exit(1)
