@@ -33,11 +33,6 @@ runs:
         GITHUB_CONTEXT: ${{ toJSON(github) }}
       shell: bash
       run: |
-        cd ${{ github.action_path }}
-        escaped_github_context=$(echo $GITHUB_CONTEXT)
-        echo "======================="
-        echo $escaped_github_context
-        echo "======================="
-        python main.py \
-          --github-context "$escaped_github_context" \
+        python ${{ github.action_path }}/main.py \
+          --github-context "$(echo $GITHUB_CONTEXT)" \
           --log-level ${{ inputs.log-level }}
