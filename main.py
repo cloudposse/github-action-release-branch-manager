@@ -34,7 +34,7 @@ def main(github_context: str):
     logging.info(f"Default branch: {default_branch}")
 
     if target_branch == default_branch:
-        if does_major_tag_already_exists(major_for_release_tag):
+        if does_major_tag_already_exists(major_for_release_tag, release_tag):
             logging.info(f"Major tag '{major_for_release_tag}' for '{release_tag}' already exists. All good.")
             return
 
@@ -78,16 +78,19 @@ def get_previous_commit(sha: str) -> str:
     return subprocess.check_output(['git', 'rev-parse', f'{sha}^']).decode('utf-8').strip()
 
 
-def does_major_tag_already_exists(major: str) -> bool:
-    tag_map = build_tag_map(get_all_tags())
+def does_major_tag_already_exists(major: str, tag_to_exclude) -> bool:
+    tag_map = build_tag_map(get_all_tags(), tag_to_exclude)
     return major in tag_map
 
 
-def build_tag_map(tags: list) -> dict:
+def build_tag_map(tags: list, tag_to_exlcude) -> dict:
     tag_map = {}
 
     for tag in tags:
         if not is_semver(tag):
+            continue
+
+        if tag == tag_to_exlcude:
             continue
 
         major = get_major(tag)
