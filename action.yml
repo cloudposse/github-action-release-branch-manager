@@ -35,6 +35,9 @@ runs:
       run: |
         cd ${{ github.action_path }}
         escaped_github_context=$(printf "%q" $GITHUB_CONTEXT)
+        echo "======================="
+        echo $escaped_github_context
+        echo "======================="
         python main.py \
           --github-context $escaped_github_context \
           --log-level ${{ inputs.log-level }}
