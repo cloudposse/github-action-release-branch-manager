@@ -2,7 +2,7 @@ const core = require('@actions/core');
 const github = require('@actions/github');
 
 try {
-    core.log('Hello World!');
+    console.log('Hello World!');
 //   const token = core.getInput('token');
 //   const title = core.getInput('title');
 //   const body = core.getInput('body');
