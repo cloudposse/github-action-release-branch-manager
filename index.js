@@ -35,7 +35,7 @@ try {
 //   const body = core.getInput('body');
   // const octokit = github.getOctokit(token);
   const context = github.context;
-  console.log(github);
+  console.log(JSON.stringify(github));
 
   validateGithubContext(context);
 
