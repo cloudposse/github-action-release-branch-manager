@@ -12,6 +12,7 @@ class ReleaseManagerError extends Error {
 }
 
 function validateGithubContext(context) {
+  console.log(context);
   const event_name = context.payload.event_name;
   if (event_name != 'release') {
     throw new ReleaseManagerError(`Unsupported event '${event_name}'. Only supported event is 'release'`);
