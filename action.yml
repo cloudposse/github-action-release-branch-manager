@@ -17,6 +17,17 @@ runs:
       with:
         fetch-depth: 0
 
+    - name: Setup Node
+      uses: actions/setup-node@v3
+      with:
+        node-version-file: "${{ github.action_path }}/.nvmrc"
+
+    - name: Install Node Dependencies
+      shell: bash
+      run: |
+        cd ${{ github.action_path }}
+        npm install
+
     - name: Run Release Branch Manager
       shell: bash
       run: |
