@@ -1,14 +1,9 @@
-name: 'Releaser GitHub Action'
+name: 'Release Branch Manager GitHub Action'
 description: 'Creates release branch based on tag major version'
 author: hello@cloudposse.com
 branding:
   icon: 'file'
   color: 'white'
-inputs:
-  log-level:
-    description: "Log level for this action. Default 'INFO'"
-    required: false
-    default: 'INFO'
 runs:
   using: "composite"
   steps:
