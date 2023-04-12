@@ -35,11 +35,9 @@ try {
 //   const body = core.getInput('body');
   // const octokit = github.getOctokit(token);
   const context = github.context;
+  console.log(github);
 
   validateGithubContext(context);
-
-  console.log('repo', repo);
-  console.log('owner', owner);
 
 //   const response = await octokit.issues.create({
 //     owner,
