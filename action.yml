@@ -17,6 +17,12 @@ runs:
       with:
         fetch-depth: 0
 
+    - name: List files
+      shell: bash
+      run: |
+        cd ${{ github.action_path }}
+        ls -l
+
     - name: Setup Node
       uses: actions/setup-node@v3
       with:
