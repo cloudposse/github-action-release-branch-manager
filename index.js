@@ -13,19 +13,19 @@ class ReleaseManagerError extends Error {
 
 function validateGithubContext(context) {
   console.log(context);
-  const event_name = context.payload.event_name;
-  if (event_name != 'release') {
-    throw new ReleaseManagerError(`Unsupported event '${event_name}'. Only supported event is 'release'`);
+  const eventName = context.payload.eventName;
+  if (eventName != 'release') {
+    throw new ReleaseManagerError(`Unsupported event '${eventName}'. Only supported event is 'release'`);
   }
 
-  const release_tag = get_release_tag(github_object)
-  if (!isSemver(release_tag)) {
-    throw new ReleaseManagerError(`Release tag '${release_tag}' is not in SemVer format`);
+  const releaseTag = getReleaseTag(context)
+  if (!isSemver(releaseTag)) {
+    throw new ReleaseManagerError(`Release tag '${releaseTag}' is not in SemVer format`);
   }
 }
 
-function get_release_tag(context) {
-  return context.payload.event.release.tag_name;
+function getReleaseTag(context) {
+  return context.payload.event.release.tagName;
 }
 
 function isSemver(version) {
