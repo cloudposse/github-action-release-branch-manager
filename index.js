@@ -3,8 +3,8 @@ const github = require('@actions/github');
 const fs = require('fs');
 const { execSync } = require('child_process');
 
-console.log(`Changing working directory to: ${process.argv[1]}`);
-process.chdir(process.argv[1]);
+console.log(`Changing working directory to: ${process.argv[2]}`);
+process.chdir(process.argv[2]);
 
 const SEMVER_PATTERN = /^(?<major>0|[1-9]\d*)\.(?<minor>0|[1-9]\d*)\.(?<patch>0|[1-9]\d*)(?:-(?<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
 const RELEASE_BRANCH_PREFIX = 'release/v';
