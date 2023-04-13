@@ -181,7 +181,7 @@ async function main() {
   }
 }
 
-await main();
+main();
 
 // try {
 // //   const body = core.getInput('body');
