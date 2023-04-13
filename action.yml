@@ -26,4 +26,6 @@ runs:
     - name: Run Release Branch Manager
       shell: bash
       run: |
-        node --cwd ${{ github.action_path }} ./index.js
+        echo "workspace=$GITHUB_WORKSPACE"
+        cd ${{ github.action_path }}
+        node ./index.js $GITHUB_WORKSPACE

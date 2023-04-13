@@ -3,10 +3,11 @@ const github = require('@actions/github');
 const fs = require('fs');
 const { execSync } = require('child_process');
 
+process.chdir(process.argv[1]);
+
 const SEMVER_PATTERN = /^(?<major>0|[1-9]\d*)\.(?<minor>0|[1-9]\d*)\.(?<patch>0|[1-9]\d*)(?:-(?<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
 const RELEASE_BRANCH_PREFIX = 'release/v';
 const RELEASE_BRANCH_PATTERN = /^release\/v(?<major>[0-9]+)$/;
-
 
 class ReleaseManagerError extends Error {
   constructor(message, status) {
@@ -182,34 +183,3 @@ async function main() {
 }
 
 main();
-
-// try {
-// //   const body = core.getInput('body');
-//   // const octokit = github.getOctokit(token);
-//   // const context = github.context;
-
-//   let context = '';
-//   readFile().then(data => {
-//     context = data;
-//     // console.log(context);
-//   }).catch(error => {
-//     console.error(error);
-//   });
-//   console.log(context);
-
-//   validateGithubContext(context);
-
-//   console.log('repo', repo);
-//   console.log('owner', owner);
-
-// //   const response = await octokit.issues.create({
-// //     owner,
-// //     repo,
-// //     title,
-// //     body
-// //   });
-
-// //   core.setOutput('issue-number', response.data.number);
-// } catch (error) {
-//   core.setFailed(error.message);
-// }
