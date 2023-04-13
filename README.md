@@ -60,7 +60,11 @@ It's 100% Open Source and licensed under the [APACHE2](LICENSE).
 
 ## Introduction
 
-GitHub Action for Managing Release Branches
+On publishing new major release `N` branch for previous release `N-1` will be created.
+
+For example when new release `v5.0.0` with tag `5.0.0` gets published this workflow will create new branch `release/v4`.
+
+This action requires repository to use SemVer versioning.
 
 
 
@@ -70,7 +74,7 @@ GitHub Action for Managing Release Branches
 
 
 
-Example of workflow that can be added to your repository. It react only on `release.published` event.
+Example of workflow that can be added to repository. It reacts only on `release.published` event.
 
 ```yaml
   name: Manager Release Branch
