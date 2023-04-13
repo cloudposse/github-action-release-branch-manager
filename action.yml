@@ -26,5 +26,4 @@ runs:
     - name: Run Release Branch Manager
       shell: bash
       run: |
-        cd ${{ github.action_path }}
-        node ./index.js
+        node --cwd ${{ github.action_path }} ./index.js
