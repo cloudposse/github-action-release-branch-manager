@@ -1,78 +1,53 @@
 ---
-#
-# This is the canonical configuration for the `README.md`
-# Run `make readme` to rebuild the `README.md`
-#
+name: github-action-release-branch-manager
 
-# Name of this project
-name: example-github-action-composite
-
-# Tags of this project
 tags:
   - github-action
 
-# Logo for this project
-#logo: docs/logo.png
-
-# License of this project
 license: "APACHE2"
 
-# Canonical GitHub repo
-github_repo: cloudposse/example-github-action-composite
+github_repo: cloudposse/github-action-release-branch-manager
 
-# Badges to display
 badges:
   - name: "Latest Release"
-    image: "https://img.shields.io/github/release/cloudposse/example-github-action-composite.svg"
-    url: "https://github.com/cloudposse/example-github-action-composite/releases/latest"
+    image: "https://img.shields.io/github/release/cloudposse/github-action-release-branch-manager.svg"
+    url: "https://github.com/cloudposse/github-action-release-branch-manager/releases/latest"
   - name: "Slack Community"
     image: "https://slack.cloudposse.com/badge.svg"
     url: "https://slack.cloudposse.com"
 
 related: []
 
-# Short description of this project
-description: Template repository of composite GitHub Action
+description: GitHub Action for Managing Release Branches
 
 introduction: |-
-  This is template repository to create composite GitHub Actions. 
-  Feel free to use it as reference and starting point.
+  GitHub Action for Managing Release Branches
 
-references:
-  - name: "github-actions-workflows"
-    description: "Reusable workflows for different types of projects"
-    url: "https://github.com/cloudposse/github-actions-workflows"
-  - name: "example-github-action-release-workflow"
-    description: "Example application with complicated release workflow"
-    url: "https://github.com/cloudposse/example-github-action-release-workflow"
+references: []
 
-# How to use this project
 usage: |-
+  Example of workflow that can be added to your repository. It react only on `release.published` event.
+
   ```yaml
-    name: Pull Request
+    name: Manager Release Branch
+
     on:
-      pull_request:
-        branches: [ 'main' ]
-        types: [opened, synchronize, reopened, closed, labeled, unlabeled]
+      release:
+        types:
+          - published
 
     jobs:
-      context:
+      publish:
         runs-on: ubuntu-latest
         steps:
-          - name: Example action
-            uses: cloudposse/example-github-action-composite@main
-            id: example
-            with:
-              param1: true
-  
-        outputs:
-          result: ${{ steps.example.outputs.result1 }}
+          - uses: cloudposse/github-action-release-branch-manager@v1
   ```
 
 include:
   - "docs/github-action.md"
 
-# Contributors to this project
 contributors:
-  - name: "Igor Rodionov"
-    github: "goruha"
+  - name: "Zinovii Dmytriv"
+    github: "zdmytriv"
+  - name: "Erik Osterman"
+    github: "osterman"
