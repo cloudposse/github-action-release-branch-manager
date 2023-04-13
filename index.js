@@ -127,7 +127,7 @@ function readFile() {
 }
 
 async function main() {
-  const github = await readFile();
+  // const github = await readFile();
   const context = github.context;
 
   try {
@@ -181,7 +181,7 @@ async function main() {
   }
 }
 
-main();
+await main();
 
 // try {
 // //   const body = core.getInput('body');
