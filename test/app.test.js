@@ -107,12 +107,13 @@ test('fail if release branch already exist', async () => {
     // prepare
     const repoPath = gitUtils.initializeGitRepo();
     const commitSHA1 = gitUtils.createAndCommitFile(repoPath, uuidv4(), uuidv4());
+    gitUtils.createTag(repoPath, '1.0.0');
     const commitSHA2 = gitUtils.createAndCommitFile(repoPath, uuidv4(), uuidv4());
     const githubEventFile = prepareGithubEvent(commitSHA2, '2.0.0');
     gitUtils.createBranch(repoPath, 'release/v1');
 
     // test
-    response = await main(repoPath, githubEventFile);
+    response = await main(repoPath, githubEventFile, false);
 
     // verify
     assert.strictEqual(response.succeeded, false);
@@ -123,6 +124,7 @@ test('successfully create release branch', async () => {
     // prepare
     const repoPath = gitUtils.initializeGitRepo();
     const commitSHA1 = gitUtils.createAndCommitFile(repoPath, uuidv4(), uuidv4());
+    gitUtils.createTag(repoPath, '1.0.0');
     const commitSHA2 = gitUtils.createAndCommitFile(repoPath, uuidv4(), uuidv4());
     const githubEventFile = prepareGithubEvent(commitSHA2, '2.0.0');
 
@@ -179,4 +181,145 @@ test('fail if target release branch is not default or "release/vN" branch', asyn
     // verify
     assert.strictEqual(response.succeeded, false);
     assert.strictEqual(response.reason, RESPONSE_REASON.TARGET_BRANCH_SHOULD_BE_EITHER_DEFAULT_OR_RELEASE_BRANCH);
+});
+
+
+test('succeeed on very first zero release', async () => {
+    // prepare
+    const repoPath = gitUtils.initializeGitRepo();
+    const commitSHA1 = gitUtils.createAndCommitFile(repoPath, uuidv4(), uuidv4());
+    const githubEventFile = prepareGithubEvent(commitSHA1, '0.0.1');
+
+    // test
+    response = await main(repoPath, githubEventFile, false);
+
+    // verify
+    assert.strictEqual(response.succeeded, true);
+    assert.strictEqual(response.reason, RESPONSE_REASON.MAJOR_TAG_IS_0);
+});
+
+test('succeeed on first zero when no previous `0` release exist', async () => {
+    // prepare
+    const repoPath = gitUtils.initializeGitRepo();
+    const commitSHA1 = gitUtils.createAndCommitFile(repoPath, uuidv4(), uuidv4());
+    const commitSHA2 = gitUtils.createAndCommitFile(repoPath, uuidv4(), uuidv4());
+    const githubEventFile = prepareGithubEvent(commitSHA2, '1.0.1');
+
+    // test
+    response = await main(repoPath, githubEventFile, false);
+
+    // verify
+    assert.strictEqual(response.succeeded, true);
+    assert.strictEqual(response.reason, RESPONSE_REASON.SUCCESSFULLY_CREATED_RELEASE_BRANCH);
+    assert.strictEqual(gitUtils.doesBranchExist(repoPath, 'release/v0'), true);
+    assert.strictEqual(gitUtils.getLastCommitOfABranch(repoPath, 'release/v0'), commitSHA1);
+});
+
+
+test('succeed if skipped few major versions', async () => {
+    // prepare
+    const repoPath = gitUtils.initializeGitRepo();
+    const commitSHA1 = gitUtils.createAndCommitFile(repoPath, uuidv4(), uuidv4());
+    const commitSHA2 = gitUtils.createAndCommitFile(repoPath, uuidv4(), uuidv4());
+    const githubEventFile = prepareGithubEvent(commitSHA2, '3.0.0');
+
+    // test
+    response = await main(repoPath, githubEventFile, false);
+
+    // verify
+    assert.strictEqual(response.succeeded, true);
+    assert.strictEqual(response.reason, RESPONSE_REASON.SUCCESSFULLY_CREATED_RELEASE_BRANCH);
+    assert.strictEqual(gitUtils.doesBranchExist(repoPath, 'release/v0'), true);
+    assert.strictEqual(gitUtils.getLastCommitOfABranch(repoPath, 'release/v0'), commitSHA1);
+});
+
+test('succeed if skipped few major versions, test 2', async () => {
+    // prepare
+    const repoPath = gitUtils.initializeGitRepo();
+    const commitSHA1 = gitUtils.createAndCommitFile(repoPath, uuidv4(), uuidv4());
+    const commitSHA2 = gitUtils.createAndCommitFile(repoPath, uuidv4(), uuidv4());
+    gitUtils.createTag(repoPath, '2.0.0');
+    const commitSHA3 = gitUtils.createAndCommitFile(repoPath, uuidv4(), uuidv4());
+    gitUtils.createTag(repoPath, '2.1.0');
+    const commitSHA4 = gitUtils.createAndCommitFile(repoPath, uuidv4(), uuidv4());
+    const githubEventFile = prepareGithubEvent(commitSHA4, '5.0.0');
+
+    // test
+    response = await main(repoPath, githubEventFile, false);
+
+    // verify
+    assert.strictEqual(response.succeeded, true);
+    assert.strictEqual(response.reason, RESPONSE_REASON.SUCCESSFULLY_CREATED_RELEASE_BRANCH);
+    assert.strictEqual(gitUtils.doesBranchExist(repoPath, 'release/v2'), true);
+    assert.strictEqual(gitUtils.getLastCommitOfABranch(repoPath, 'release/v2'), commitSHA3);
+
+    gitUtils.checkoutBranch(repoPath, 'main');
+    console.log("Current state of repo:\n" + gitUtils.getCurrentStateOfRepo(repoPath));
+});
+
+test('succeed when multiple commit are pushed between last tags version', async () => {
+    // prepare
+    const repoPath = gitUtils.initializeGitRepo();
+    gitUtils.createAndCommitFile(repoPath, uuidv4(), uuidv4());
+    gitUtils.createAndCommitFile(repoPath, uuidv4(), uuidv4());
+    gitUtils.createTag(repoPath, '1.0.0');
+    const commitSHA1 = gitUtils.createAndCommitFile(repoPath, uuidv4(), uuidv4());
+    gitUtils.createTag(repoPath, '1.1.0');
+    gitUtils.createAndCommitFile(repoPath, uuidv4(), uuidv4());
+    gitUtils.createAndCommitFile(repoPath, uuidv4(), uuidv4());
+    gitUtils.createAndCommitFile(repoPath, uuidv4(), uuidv4());
+    const commitSHA2 = gitUtils.createAndCommitFile(repoPath, uuidv4(), uuidv4());
+    const githubEventFile = prepareGithubEvent(commitSHA2, '2.0.0');
+
+    // test
+    response = await main(repoPath, githubEventFile, false);
+
+    // verify
+    assert.strictEqual(response.succeeded, true);
+    assert.strictEqual(response.reason, RESPONSE_REASON.SUCCESSFULLY_CREATED_RELEASE_BRANCH);
+    assert.strictEqual(gitUtils.doesBranchExist(repoPath, 'release/v1'), true);
+    assert.strictEqual(gitUtils.getLastCommitOfABranch(repoPath, 'release/v1'), commitSHA1);
+
+    gitUtils.checkoutBranch(repoPath, 'main');
+    console.log("Current state of repo:\n" + gitUtils.getCurrentStateOfRepo(repoPath));
+});
+
+test('succeed when multiple commit are pushed between last tags version + mix ', async () => {
+    // prepare
+    const repoPath = gitUtils.initializeGitRepo();
+    gitUtils.createAndCommitFile(repoPath, uuidv4(), uuidv4());
+    gitUtils.createBranch(repoPath, 'release/v0');
+    gitUtils.createAndCommitFile(repoPath, uuidv4(), uuidv4());
+    gitUtils.createAndCommitFile(repoPath, uuidv4(), uuidv4());
+    gitUtils.checkoutBranch(repoPath, 'main');
+    gitUtils.createAndCommitFile(repoPath, uuidv4(), uuidv4());
+    gitUtils.createTag(repoPath, '1.0.0');
+    const commitSHA1 = gitUtils.createAndCommitFile(repoPath, uuidv4(), uuidv4());
+    gitUtils.createTag(repoPath, '1.1.0');
+    gitUtils.createAndCommitFile(repoPath, uuidv4(), uuidv4());
+    gitUtils.createAndCommitFile(repoPath, uuidv4(), uuidv4());
+    gitUtils.createAndCommitFile(repoPath, uuidv4(), uuidv4());
+    gitUtils.checkoutBranch(repoPath, 'release/v0');
+    gitUtils.createAndCommitFile(repoPath, uuidv4(), uuidv4());
+    gitUtils.createAndCommitFile(repoPath, uuidv4(), uuidv4());
+    gitUtils.createTag(repoPath, '0.3.5');
+    gitUtils.checkoutBranch(repoPath, 'main');
+    const commitSHA2 = gitUtils.createAndCommitFile(repoPath, uuidv4(), uuidv4());
+    const githubEventFile = prepareGithubEvent(commitSHA2, '2.0.0');
+
+    console.log(gitUtils.getCurrentStateOfRepo(repoPath));
+
+    // test
+    response = await main(repoPath, githubEventFile, false);
+
+    // verify
+    assert.strictEqual(response.succeeded, true);
+    assert.strictEqual(response.reason, RESPONSE_REASON.SUCCESSFULLY_CREATED_RELEASE_BRANCH);
+    assert.strictEqual(gitUtils.doesBranchExist(repoPath, 'release/v1'), true);
+    assert.strictEqual(gitUtils.getLastCommitOfABranch(repoPath, 'release/v1'), commitSHA1);
+
+    gitUtils.checkoutBranch(repoPath, 'main');
+    console.log(gitUtils.getCurrentStateOfRepo(repoPath));
+    console.log(gitUtils.getCurrentStateOfRepo(repoPath, 'release/v0'));
+    console.log(gitUtils.getCurrentStateOfRepo(repoPath, 'release/v1'));
 });

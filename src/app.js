@@ -55,11 +55,11 @@ function getTagCommit(context) {
 
 function getMajor(version) {
   const match = version.match(SEMVER_PATTERN);
-  return match?.groups?.major || '';
+  return parseInt(match?.groups?.major || '0');
 }
 
-function doesMajorTagAlreadyExist(repoPath, major, tagToExclude) {
-  const tagMap = buildTagMap(gitUtils.getAllTags(repoPath), tagToExclude);
+function doesMajorTagAlreadyExist(tags, major, tagToExclude) {
+  const tagMap = buildTagMap(tags, tagToExclude);
   return major in tagMap;
 }
 
@@ -115,7 +115,33 @@ function buildResponse(succeeded, reason, message) {
   return response;
 }
 
+function getPreviousTag(tags, currentMajor) {
+  let previousMajorTag = -1;
+  let previousTag = '0.0.0';
+
+  for (const tag of tags) {
+    if (!isSemver(tag)) {
+      continue;
+    }
+
+    const major = getMajor(tag);
+
+    if (major == currentMajor) {
+      continue;
+    }
+
+    if (previousMajorTag < major) {
+      previousMajorTag = major;
+      previousTag = tag;
+    }
+  }
+
+  return previousTag;
+}
+
 async function main(workingDirectory, contextFile, doPush = true) {
+  const repoPath = workingDirectory;
+
   let context;
   if (contextFile != null) {
     const github = await readFile(contextFile);
@@ -147,33 +173,44 @@ async function main(workingDirectory, contextFile, doPush = true) {
   const defaultBranch = getDefaultBranch(context);
   logger.info(`Default branch: ${defaultBranch}`);
 
-  if (majorForReleaseTag == '0') {
+  if (majorForReleaseTag == 0) {
     return buildResponse(true, RESPONSE_REASON.MAJOR_TAG_IS_0,
       `Major version of release tag is '0'. No release branch will be created. All good.`);
   }
 
-  repoPath = workingDirectory;
+  gitUtils.gitCheckoutAtTag(repoPath, releaseTag);
+  logger.info("Current state of repo:\n" + gitUtils.getCurrentStateOfRepo(repoPath));
 
-  process.chdir(workingDirectory);
+  const tags = gitUtils.getAllTags(repoPath);
 
   if (targetBranch == defaultBranch || targetBranch == `refs/heads/${defaultBranch}`) {
-    if (doesMajorTagAlreadyExist(workingDirectory, majorForReleaseTag, releaseTag)) {
-      return buildResponse(true, RESPONSE_REASON.MAJOR_TAG_ALREADY_EXISTS, `Major tag '${majorForReleaseTag}' for '${releaseTag}' already exists. All good.`);
+    if (doesMajorTagAlreadyExist(tags, majorForReleaseTag, releaseTag)) {
+      return buildResponse(true, RESPONSE_REASON.MAJOR_TAG_ALREADY_EXISTS,
+        `Major tag '${majorForReleaseTag}' for '${releaseTag}' already exists. All good.`);
     }
 
-    const previousCommit = gitUtils.getPreviousCommit(repoPath, getTagCommit(context));
-    logger.info(`Previous commit: ${previousCommit}`);
+    const previousTag = getPreviousTag(tags, majorForReleaseTag);
+    logger.info(`Previous tag: ${previousTag}`);
 
-    const previousTag = Math.max(parseInt(majorForReleaseTag, 10) - 1, 0);
-    const releaseBranchName = (majorForReleaseTag == '') ? `${RELEASE_BRANCH_PREFIX}0` : `${RELEASE_BRANCH_PREFIX}${previousTag}`;
+    const previousMajorTag = getMajor(previousTag);
+    logger.info(`Last major tag: ${previousMajorTag}`);
+
+    const releaseBranchName = `${RELEASE_BRANCH_PREFIX}${previousMajorTag}`;
     logger.info(`Release branch to create: ${releaseBranchName}`);
 
     if (gitUtils.doesBranchExist(repoPath, releaseBranchName)) {
-      return buildResponse(false, RESPONSE_REASON.RELEASE_BRANCH_ALREADY_EXISTS, `Branch '${releaseBranchName}' already exists`);
+      return buildResponse(false, RESPONSE_REASON.RELEASE_BRANCH_ALREADY_EXISTS,
+        `Branch '${releaseBranchName}' already exists`);
     }
+
+    const previousCommit = previousTag == '0.0.0' ?
+      gitUtils.getPreviousCommit(repoPath, getTagCommit(context)) :
+      gitUtils.getCommitForTag(repoPath, previousTag);
+    logger.info(`Previous commit: ${previousCommit}`);
 
     logger.info(`Creating branch '${releaseBranchName}' from commit '${previousCommit}' and pushing it to origin`);
     gitUtils.createBranchFromCommitAndPush(repoPath, releaseBranchName, previousCommit, doPush);
+    logger.info("Current state of repo:\n" + gitUtils.getCurrentStateOfRepo(repoPath));
     return buildResponse(true, RESPONSE_REASON.SUCCESSFULLY_CREATED_RELEASE_BRANCH, `Created branch '${releaseBranchName}'`);
   } else if (isBranchAReleaseBranch(targetBranch)) {
     const majorForReleaseBranch = getMajorFromReleaseBranch(targetBranch);
