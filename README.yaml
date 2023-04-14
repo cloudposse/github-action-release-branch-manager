@@ -1,5 +1,5 @@
 ---
-name: github-action-release-branch-manager
+name: Release Branch Manager
 
 tags:
   - github-action
@@ -27,10 +27,8 @@ introduction: |-
 
   This action requires repository to use SemVer versioning.
 
-references: []
-
 usage: |-
-  Example of workflow that can be added to repository. It reacts only on `release.published` event.
+  Example of workflow that can be added to repository.
 
   ```yaml
     name: Manager Release Branch
@@ -46,6 +44,14 @@ usage: |-
         steps:
           - uses: cloudposse/github-action-release-branch-manager@v1
   ```
+
+references:
+  - name: "Release Drafter GitHub Action"
+    description: 'Drafts your next release notes as pull requests are merged into your default branch.'
+    url: "https://github.com/release-drafter/release-drafter"
+  - name: "Release Branch Manager GitHub Action"
+    description: 'Automatically creates "Long Term Support (LTS)" release branches when new releases are published'
+    url: "https://en.wikipedia.org/wiki/Test_harness"
 
 include:
   - "docs/github-action.md"

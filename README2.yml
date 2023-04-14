@@ -1,0 +1,61 @@
+---
+    name: Release Label Validator
+    
+    tags:
+      - github-action
+    
+    license: "APACHE2"
+    
+    github_repo: cloudposse/github-action-release-label-validator
+    
+    badges:
+      - name: "Latest Release"
+        image: "https://img.shields.io/github/release/cloudposse/github-action-release-label-validator.svg"
+        url: "https://github.com/cloudposse/github-action-release-label-validator/releases/latest"
+      - name: "Slack Community"
+        image: "https://slack.cloudposse.com/badge.svg"
+        url: "https://slack.cloudposse.com"
+    
+    related: []
+    
+    description: Only Pull Requests created against default branch can have label `major` set
+    
+    introduction: |-
+      This is a GitHub Action to validate that only Pull Requests targeting the default branch can have the `major` label set. This is useful in combination with the [`release-drafter`](https://github.com/release-drafter/release-drafter) and the Cloud Posse [`release-branch-manager`](https://github.com/cloudposse/github-action-release-branch-manager) GitHub Actions.
+    
+    usage: |-
+      ```yaml
+        name: validate-release-labels
+    
+        on:
+          pull_request:
+            types:
+              - labeled
+              - unlabeled
+              - opened
+              - synchronize
+              - reopened
+    
+        jobs:
+          publish:
+            runs-on: ubuntu-latest
+            steps:
+              - uses: cloudposse/github-action-release-label-validator@v1
+      ```
+    
+    references:
+      - name: "Release Drafter GitHub Action"
+        description: 'Drafts your next release notes as pull requests are merged into your default branch.'
+        url: "https://github.com/release-drafter/release-drafter"
+      - name: "Release Branch Manager GitHub Action"
+        description: 'Automatically creates "Long Term Support (LTS)" release branches when new releases are published'
+        url: "https://en.wikipedia.org/wiki/Test_harness"
+    
+    include:
+      - "docs/github-action.md"
+    
+    contributors:
+      - name: "Zinovii Dmytriv"
+        github: "zdmytriv"
+      - name: "Erik Osterman"
+        github: "osterman"

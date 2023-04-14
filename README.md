@@ -1,8 +1,6 @@
 
 <!-- markdownlint-disable -->
-# github-action-release-branch-manager
-
- [![Latest Release](https://img.shields.io/github/release/cloudposse/github-action-release-branch-manager.svg)](https://github.com/cloudposse/github-action-release-branch-manager/releases/latest) [![Slack Community](https://slack.cloudposse.com/badge.svg)](https://slack.cloudposse.com)
+# Release Branch Manager [![Latest Release](https://img.shields.io/github/release/cloudposse/github-action-release-branch-manager.svg)](https://github.com/cloudposse/github-action-release-branch-manager/releases/latest) [![Slack Community](https://slack.cloudposse.com/badge.svg)](https://slack.cloudposse.com)
 <!-- markdownlint-restore -->
 
 [![README Header][readme_header_img]][readme_header_link]
@@ -74,7 +72,7 @@ This action requires repository to use SemVer versioning.
 
 
 
-Example of workflow that can be added to repository. It reacts only on `release.published` event.
+Example of workflow that can be added to repository.
 
 ```yaml
   name: Manager Release Branch
@@ -122,6 +120,8 @@ Check out these related projects.
 
 For additional context, refer to some of these links.
 
+- [Release Drafter GitHub Action](https://github.com/release-drafter/release-drafter) - Drafts your next release notes as pull requests are merged into your default branch.
+- [Release Branch Manager GitHub Action](https://en.wikipedia.org/wiki/Test_harness) - Automatically creates "Long Term Support (LTS)" release branches when new releases are published
 
 
 ## Help
@@ -288,11 +288,11 @@ Check out [our other projects][github], [follow us on twitter][twitter], [apply 
   [readme_footer_link]: https://cloudposse.com/readme/footer/link?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/github-action-release-branch-manager&utm_content=readme_footer_link
   [readme_commercial_support_img]: https://cloudposse.com/readme/commercial-support/img
   [readme_commercial_support_link]: https://cloudposse.com/readme/commercial-support/link?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/github-action-release-branch-manager&utm_content=readme_commercial_support_link
-  [share_twitter]: https://twitter.com/intent/tweet/?text=github-action-release-branch-manager&url=https://github.com/cloudposse/github-action-release-branch-manager
-  [share_linkedin]: https://www.linkedin.com/shareArticle?mini=true&title=github-action-release-branch-manager&url=https://github.com/cloudposse/github-action-release-branch-manager
+  [share_twitter]: https://twitter.com/intent/tweet/?text=Release+Branch+Manager&url=https://github.com/cloudposse/github-action-release-branch-manager
+  [share_linkedin]: https://www.linkedin.com/shareArticle?mini=true&title=Release+Branch+Manager&url=https://github.com/cloudposse/github-action-release-branch-manager
   [share_reddit]: https://reddit.com/submit/?url=https://github.com/cloudposse/github-action-release-branch-manager
   [share_facebook]: https://facebook.com/sharer/sharer.php?u=https://github.com/cloudposse/github-action-release-branch-manager
   [share_googleplus]: https://plus.google.com/share?url=https://github.com/cloudposse/github-action-release-branch-manager
-  [share_email]: mailto:?subject=github-action-release-branch-manager&body=https://github.com/cloudposse/github-action-release-branch-manager
+  [share_email]: mailto:?subject=Release+Branch+Manager&body=https://github.com/cloudposse/github-action-release-branch-manager
   [beacon]: https://ga-beacon.cloudposse.com/UA-76589703-4/cloudposse/github-action-release-branch-manager?pixel&cs=github&cm=readme&an=github-action-release-branch-manager
 <!-- markdownlint-restore -->
