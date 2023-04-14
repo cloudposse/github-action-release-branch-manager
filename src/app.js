@@ -12,7 +12,7 @@ const logger = log4js.getLogger();
 
 const SEMVER_PATTERN = /^(?<major>[0-9]+)\.(?<minor>[0-9]+)\.(?<patch>[0-9]+)$/;
 const RELEASE_BRANCH_PREFIX = 'release/v';
-const RELEASE_BRANCH_PATTERN = /^release\/v(?<major>[0-9]+)$/;
+const RELEASE_BRANCH_PATTERN = /^(refs\/heads\/)?release\/v(?<major>[0-9]+)$/;
 const RESPONSE_REASON = {
   INVALID_EVENT_TYPE: 'INVALID_EVENT_TYPE',
   TAG_IS_NOT_SEMVER: 'TAG_IS_NOT_SEMVER',
