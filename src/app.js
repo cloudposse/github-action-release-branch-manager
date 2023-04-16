@@ -1,4 +1,5 @@
 const fs = require('fs');
+const semver = require('semver');
 const github = require('@actions/github');
 const log4js = require('log4js');
 const gitUtils = require('../src/git_utils.js');
@@ -10,7 +11,6 @@ log4js.configure({
 
 const logger = log4js.getLogger();
 
-const SEMVER_PATTERN = /^(?<major>[0-9]+)\.(?<minor>[0-9]+)\.(?<patch>[0-9]+)$/;
 const RELEASE_BRANCH_PREFIX = 'release/v';
 const RELEASE_BRANCH_PATTERN = /^(refs\/heads\/)?release\/v(?<major>[0-9]+)$/;
 const RESPONSE_REASON = {
@@ -24,6 +24,7 @@ const RESPONSE_REASON = {
   RELEASE_TAG_AND_RELEASE_BRANCH_DOESNT_MATCH: 'RELEASE_TAG_AND_RELEASE_BRANCH_DOESNT_MATCH',
   TARGET_BRANCH_SHOULD_BE_EITHER_DEFAULT_OR_RELEASE_BRANCH: 'TARGET_BRANCH_SHOULD_BE_EITHER_DEFAULT_OR_RELEASE_BRANCH',
 };
+const DEFAULT_PREVIOUS_TAG = '0.0.0';
 
 class Response {
   constructor() {
@@ -38,7 +39,7 @@ function getReleaseTag(context) {
 }
 
 function isSemver(version) {
-  return SEMVER_PATTERN.test(version);
+  return semver.valid(version) != null;
 }
 
 function getTargetBranch(context) {
@@ -54,8 +55,7 @@ function getTagCommit(context) {
 }
 
 function getMajor(version) {
-  const match = version.match(SEMVER_PATTERN);
-  return parseInt(match?.groups?.major || '0');
+  return semver.major(version);
 }
 
 function doesMajorTagAlreadyExist(tags, major, tagToExclude) {
@@ -117,7 +117,7 @@ function buildResponse(succeeded, reason, message) {
 
 function getPreviousTag(tags, currentMajor) {
   let previousMajorTag = -1;
-  let previousTag = '0.0.0';
+  let previousTag = DEFAULT_PREVIOUS_TAG;
 
   for (const tag of tags) {
     if (!isSemver(tag)) {
@@ -203,7 +203,7 @@ async function main(workingDirectory, contextFile, doPush = true) {
         `Branch '${releaseBranchName}' already exists`);
     }
 
-    const previousCommit = previousTag == '0.0.0' ?
+    const previousCommit = previousTag == DEFAULT_PREVIOUS_TAG ?
       gitUtils.getPreviousCommit(repoPath, getTagCommit(context)) :
       gitUtils.getCommitForTag(repoPath, previousTag);
     logger.info(`Previous commit: ${previousCommit}`);
