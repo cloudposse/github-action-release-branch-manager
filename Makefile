@@ -14,6 +14,11 @@ lint:
 install-deps:
 	npm install
 
+.PHONY: lint
+
+lint:
+	npm run lint
+
 .PHONY: test
 
 test:

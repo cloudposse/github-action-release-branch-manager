@@ -61,7 +61,7 @@ function initializeGitRepo() {
 }
 
 function createAndCommitFile(repoPath, fileName, content) {
-  const path = repoPath + "/" + fileName;
+  const path = repoPath + '/' + fileName;
   fs.writeFileSync(path, content);
 
   execSync('git add .', { cwd: repoPath });

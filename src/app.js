@@ -5,7 +5,7 @@ const gitUtils = require('../src/git_utils.js');
 
 log4js.configure({
   appenders: { console: { type: 'console' } },
-  categories: { default: { appenders: ['console'], level: 'info' } }
+  categories: { default: { appenders: ['console'], level: 'info' } },
 });
 
 const logger = log4js.getLogger();
@@ -156,7 +156,7 @@ async function main(workingDirectory, contextFile, doPush = true) {
       `Unsupported event '${eventName}'. Only supported event is 'release'`);
   }
 
-  const releaseTag = getReleaseTag(context)
+  const releaseTag = getReleaseTag(context);
   logger.info(`Release tag: ${releaseTag}`);
 
   if (!isSemver(releaseTag)) {
@@ -179,7 +179,7 @@ async function main(workingDirectory, contextFile, doPush = true) {
   }
 
   gitUtils.gitCheckoutAtTag(repoPath, releaseTag);
-  logger.info("Current state of repo:\n" + gitUtils.getCurrentStateOfRepo(repoPath));
+  logger.info('Current state of repo:\n' + gitUtils.getCurrentStateOfRepo(repoPath));
 
   const tags = gitUtils.getAllTags(repoPath);
 
@@ -210,7 +210,7 @@ async function main(workingDirectory, contextFile, doPush = true) {
 
     logger.info(`Creating branch '${releaseBranchName}' from commit '${previousCommit}' and pushing it to origin`);
     gitUtils.createBranchFromCommitAndPush(repoPath, releaseBranchName, previousCommit, doPush);
-    logger.info("Current state of repo:\n" + gitUtils.getCurrentStateOfRepo(repoPath));
+    logger.info('Current state of repo:\n' + gitUtils.getCurrentStateOfRepo(repoPath));
     return buildResponse(true, RESPONSE_REASON.SUCCESSFULLY_CREATED_RELEASE_BRANCH, `Created branch '${releaseBranchName}'`);
   } else if (isBranchAReleaseBranch(targetBranch)) {
     const majorForReleaseBranch = getMajorFromReleaseBranch(targetBranch);
