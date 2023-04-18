@@ -4,95 +4,32 @@ const github = require('@actions/github');
 const log4js = require('log4js');
 const gitUtils = require('../src/git_utils.js');
 
+const logLevel = process.env.LOG_LEVEL || 'info';
+
 log4js.configure({
   appenders: { console: { type: 'console' } },
-  categories: { default: { appenders: ['console'], level: 'info' } },
+  categories: { default: { appenders: ['console'], level: logLevel } },
 });
 
 const logger = log4js.getLogger();
 
 const RELEASE_BRANCH_PREFIX = 'release/v';
-const RELEASE_BRANCH_PATTERN = /^(refs\/heads\/)?release\/v(?<major>[0-9]+)$/;
 const RESPONSE_REASON = {
-  INVALID_EVENT_TYPE: 'INVALID_EVENT_TYPE',
-  TAG_IS_NOT_SEMVER: 'TAG_IS_NOT_SEMVER',
-  MAJOR_TAG_IS_0: 'MAJOR_TAG_IS_0',
-  MAJOR_TAG_ALREADY_EXISTS: 'MAJOR_TAG_ALREADY_EXISTS',
-  RELEASE_BRANCH_ALREADY_EXISTS: 'RELEASE_BRANCH_ALREADY_EXISTS',
-  SUCCESSFULLY_CREATED_RELEASE_BRANCH: 'SUCCESSFULLY_CREATED_RELEASE_BRANCH',
-  PUBLISHED_RELEASE_TO_RELEASE_BRANCH: 'PUBLISHED_RELEASE_TO_RELEASE_BRANCH',
-  RELEASE_TAG_AND_RELEASE_BRANCH_DOESNT_MATCH: 'RELEASE_TAG_AND_RELEASE_BRANCH_DOESNT_MATCH',
-  TARGET_BRANCH_SHOULD_BE_EITHER_DEFAULT_OR_RELEASE_BRANCH: 'TARGET_BRANCH_SHOULD_BE_EITHER_DEFAULT_OR_RELEASE_BRANCH',
+  NO_CHANGES: 'NO_CHANGES',
+  CREATED_BRANCHES: 'CREATED_BRANCHES',
 };
-const DEFAULT_PREVIOUS_TAG = '0.0.0';
 
 class Response {
-  constructor() {
-    this.succeeded = false;
-    this.reason = null;
-    this.message = '';
+  constructor(succeeded, reason, message, data) {
+    this.succeeded = succeeded;
+    this.reason = reason;
+    this.message = message;
+    this.data = data;
   }
-}
-
-function getReleaseTag(context) {
-  return context.payload.release.tag_name;
-}
-
-function isSemver(version) {
-  return semver.valid(version) != null;
-}
-
-function getTargetBranch(context) {
-  return context.payload.release.target_commitish;
 }
 
 function getDefaultBranch(context) {
   return context.payload.repository.default_branch;
-}
-
-function getTagCommit(context) {
-  return context.sha;
-}
-
-function getMajor(version) {
-  return semver.major(version);
-}
-
-function doesMajorTagAlreadyExist(tags, major, tagToExclude) {
-  const tagMap = buildTagMap(tags, tagToExclude);
-  return major in tagMap;
-}
-
-function getMajorFromReleaseBranch(releaseBranch) {
-  const match = releaseBranch.match(RELEASE_BRANCH_PATTERN);
-  return match?.groups?.major || '';
-}
-
-function isBranchAReleaseBranch(branchName) {
-  return RELEASE_BRANCH_PATTERN.test(branchName);
-}
-
-function buildTagMap(tags, tagToExclude) {
-  const tagMap = {};
-
-  for (const tag of tags) {
-    if (!isSemver(tag)) {
-      continue;
-    }
-
-    if (tag === tagToExclude) {
-      continue;
-    }
-
-    const major = getMajor(tag);
-    if (!(major in tagMap)) {
-      tagMap[major] = [];
-    }
-
-    tagMap[major].push(tag);
-  }
-
-  return tagMap;
 }
 
 function readFile(contextFile) {
@@ -107,42 +44,9 @@ function readFile(contextFile) {
   });
 }
 
-function buildResponse(succeeded, reason, message) {
-  const response = new Response();
-  response.succeeded = succeeded;
-  response.reason = reason;
-  response.message = message;
-  return response;
-}
-
-function getPreviousTag(tags, currentMajor) {
-  let previousMajorTag = -1;
-  let previousTag = DEFAULT_PREVIOUS_TAG;
-
-  for (const tag of tags) {
-    if (!isSemver(tag)) {
-      continue;
-    }
-
-    const major = getMajor(tag);
-
-    if (major == currentMajor) {
-      continue;
-    }
-
-    if (previousMajorTag < major) {
-      previousMajorTag = major;
-      previousTag = tag;
-    }
-  }
-
-  return previousTag;
-}
-
-async function main(workingDirectory, contextFile, doPush = true) {
-  const repoPath = workingDirectory;
-
+async function loadContext(contextFile) {
   let context;
+
   if (contextFile != null) {
     const github = await readFile(contextFile);
     context = github.context;
@@ -150,81 +54,86 @@ async function main(workingDirectory, contextFile, doPush = true) {
     context = github.context;
   }
 
-  const eventName = context.eventName;
-  if (eventName != 'release') {
-    return buildResponse(false, RESPONSE_REASON.INVALID_EVENT_TYPE,
-      `Unsupported event '${eventName}'. Only supported event is 'release'`);
+  return context;
+}
+
+function isSemver(version) {
+  return semver.valid(version) != null;
+}
+
+function getLatestSemVerTagsForPerMajor(tags) {
+  const latestTagsPerMajorVersion = new Map();
+
+  for (const tag of tags) {
+    if (isSemver(tag)) {
+      const major = semver.major(tag);
+      const key = `${major}`;
+
+      if (!latestTagsPerMajorVersion.has(key)) {
+        latestTagsPerMajorVersion.set(key, tag);
+      }
+    }
   }
 
-  const releaseTag = getReleaseTag(context);
-  logger.info(`Release tag: ${releaseTag}`);
+  return latestTagsPerMajorVersion;
+}
 
-  if (!isSemver(releaseTag)) {
-    return buildResponse(false, RESPONSE_REASON.TAG_IS_NOT_SEMVER,
-      `Release tag '${releaseTag}' is not in SemVer format`);
-  }
+async function main(repoPath, contextFile = null, doPush = true) {
+  try {
+    const context = await loadContext(contextFile);
+    const defaultBranch = getDefaultBranch(context);
 
-  const targetBranch = getTargetBranch(context);
-  logger.info(`Target branch: ${targetBranch}`);
+    const allTags = gitUtils.getAllTags(repoPath);
+    logger.debug(`All available tags:\n${allTags.join('\n')}`);
 
-  const majorForReleaseTag = getMajor(releaseTag);
-  logger.info(`Major version for release tag branch: ${targetBranch}`);
+    const latestSemVerTagsPerMajor = getLatestSemVerTagsForPerMajor(allTags);
+    logger.info(`Latest SemVer tags:\n${Array.from(latestSemVerTagsPerMajor.values()).join('\n')}`);
 
-  const defaultBranch = getDefaultBranch(context);
-  logger.info(`Default branch: ${defaultBranch}`);
-
-  if (majorForReleaseTag == 0) {
-    return buildResponse(true, RESPONSE_REASON.MAJOR_TAG_IS_0,
-      `Major version of release tag is '0'. No release branch will be created. All good.`);
-  }
-
-  gitUtils.gitCheckoutAtTag(repoPath, releaseTag);
-  logger.info('Current state of repo:\n' + gitUtils.getCurrentStateOfRepo(repoPath));
-
-  const tags = gitUtils.getAllTags(repoPath);
-
-  if (targetBranch == defaultBranch || targetBranch == `refs/heads/${defaultBranch}`) {
-    if (doesMajorTagAlreadyExist(tags, majorForReleaseTag, releaseTag)) {
-      return buildResponse(true, RESPONSE_REASON.MAJOR_TAG_ALREADY_EXISTS,
-        `Major tag '${majorForReleaseTag}' for '${releaseTag}' already exists. All good.`);
+    if (latestSemVerTagsPerMajor.size === 0) {
+      return new Response(true, RESPONSE_REASON.NO_CHANGES, 'No SemVer tags found', {});
     }
 
-    const previousTag = getPreviousTag(tags, majorForReleaseTag);
-    logger.info(`Previous tag: ${previousTag}`);
-
-    const previousMajorTag = getMajor(previousTag);
-    logger.info(`Last major tag: ${previousMajorTag}`);
-
-    const releaseBranchName = `${RELEASE_BRANCH_PREFIX}${previousMajorTag}`;
-    logger.info(`Release branch to create: ${releaseBranchName}`);
-
-    if (gitUtils.doesBranchExist(repoPath, releaseBranchName)) {
-      return buildResponse(false, RESPONSE_REASON.RELEASE_BRANCH_ALREADY_EXISTS,
-        `Branch '${releaseBranchName}' already exists`);
+    let highestMajor = -1;
+    for (const major of latestSemVerTagsPerMajor.keys()) {
+      const majorInt = parseInt(major);
+      if (majorInt > highestMajor) {
+        highestMajor = majorInt;
+      }
     }
 
-    const previousCommit = previousTag == DEFAULT_PREVIOUS_TAG ?
-      gitUtils.getPreviousCommit(repoPath, getTagCommit(context)) :
-      gitUtils.getCommitForTag(repoPath, previousTag);
-    logger.info(`Previous commit: ${previousCommit}`);
+    const responseData = {};
 
-    logger.info(`Creating branch '${releaseBranchName}' from commit '${previousCommit}' and pushing it to origin`);
-    gitUtils.createBranchFromCommitAndPush(repoPath, releaseBranchName, previousCommit, doPush);
-    logger.info('Current state of repo:\n' + gitUtils.getCurrentStateOfRepo(repoPath));
-    return buildResponse(true, RESPONSE_REASON.SUCCESSFULLY_CREATED_RELEASE_BRANCH, `Created branch '${releaseBranchName}'`);
-  } else if (isBranchAReleaseBranch(targetBranch)) {
-    const majorForReleaseBranch = getMajorFromReleaseBranch(targetBranch);
+    for (const [major, tag] of latestSemVerTagsPerMajor) {
+      const releaseBranch = `${RELEASE_BRANCH_PREFIX}${major}`;
+      const releaseBranchExists = gitUtils.doesBranchExist(repoPath, releaseBranch);
 
-    if (majorForReleaseTag == majorForReleaseBranch) {
-      return buildResponse(true, RESPONSE_REASON.PUBLISHED_RELEASE_TO_RELEASE_BRANCH,
-        `Published release ${releaseTag} for release branch '${targetBranch}'. All good.`);
+      if (releaseBranchExists) {
+        logger.info(`Release branch '${releaseBranch}' for major tag ${major} already exists. Skipping.`);
+        continue;
+      }
+
+      if (major === `${highestMajor}`) {
+        logger.info(`Skipping creation of release branch '${releaseBranch}' for tag (${tag}) as it is the highest major version.`);
+        continue;
+      }
+
+      gitUtils.gitCheckoutAtTag(repoPath, tag);
+      gitUtils.createBranch(repoPath, releaseBranch);
+      gitUtils.checkoutBranch(repoPath, defaultBranch);
+
+      responseData[releaseBranch] = tag;
+
+      logger.info(`Created release branch '${releaseBranch}' for tag (${tag}).`);
+    }
+
+    if (Object.keys(responseData).length === 0) {
+      return new Response(true, RESPONSE_REASON.NO_CHANGES, 'No changes were made', {});
     } else {
-      return buildResponse(false, RESPONSE_REASON.RELEASE_TAG_AND_RELEASE_BRANCH_DOESNT_MATCH,
-        `Major version in release tag '${releaseTag}' does not match release branch version '${targetBranch}'`);
+      return new Response(true, RESPONSE_REASON.CREATED_BRANCHES, `Successfully created release branches`, responseData);
     }
-  } else {
-    return buildResponse(false, RESPONSE_REASON.TARGET_BRANCH_SHOULD_BE_EITHER_DEFAULT_OR_RELEASE_BRANCH,
-      `Target branch '${targetBranch}' is not a default or release branch`);
+  } catch (error) {
+    logger.error(error);
+    return new Response(false, null, error.message, {});
   }
 }
 

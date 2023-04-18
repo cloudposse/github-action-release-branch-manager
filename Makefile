@@ -14,9 +14,9 @@ lint:
 install-deps:
 	npm install
 
-.PHONY: lint
+.PHONY: jslint
 
-lint:
+jslint:
 	npm run lint
 
 .PHONY: test

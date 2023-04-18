@@ -4,6 +4,15 @@ author: hello@cloudposse.com
 branding:
   icon: 'file'
   color: 'white'
+inputs:
+  log-level:
+    description: "Log level for this action. Available options: ['off', 'error', 'warn', 'info', 'debug']. Default 'info'"
+    required: false
+    default: "info"
+outputs:
+  response:
+    description: 'Response in json format for example: {"succeeded":true,"reason":"CREATED_BRANCHES","message":"Successfully created release branches","data":{"release/v3":"3.1.0","release/v2":"2.0.0","release/v1":"1.1.0"}}'
+    value: ${{ steps.run_release_branch_manager.outputs.response }}
 runs:
   using: "composite"
   steps:
@@ -25,6 +34,13 @@ runs:
 
     - name: Run Release Branch Manager
       shell: bash
+      id: run_release_branch_manager
       run: |
         cd ${{ github.action_path }}
+        export LOG_LEVEL='${{ inputs.log-level }}'
         node index.js $GITHUB_WORKSPACE
+
+    - name: Get the output
+      shell: bash
+      run: |
+        echo "${{ steps.run_release_branch_manager.outputs.response }}"

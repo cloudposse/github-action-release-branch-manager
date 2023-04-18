@@ -24,7 +24,7 @@ jobs:
 
       - name: Lint
         run: |
-          make lint
+          make jslint
 
       - name: Run Tests
         run: |
