@@ -119,6 +119,11 @@ async function main(repoPath, contextFile = null, doPush = true) {
 
       gitUtils.gitCheckoutAtTag(repoPath, tag);
       gitUtils.createBranch(repoPath, releaseBranch);
+
+      if (doPush) {
+        gitUtils.pushBranchToRemote(repoPath, releaseBranch);
+      }
+
       gitUtils.checkoutBranch(repoPath, defaultBranch);
 
       responseData[releaseBranch] = tag;

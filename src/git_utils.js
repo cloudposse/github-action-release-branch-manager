@@ -37,6 +37,10 @@ function createBranch(repoPath, branchName) {
   execSync(`git checkout -b ${branchName}`, { cwd: repoPath });
 }
 
+function pushBranchToRemote(repoPath, branchName) {
+  execSync(`git push origin ${branchName}`, { cwd: repoPath });
+}
+
 function getCurrentStateOfRepo(repoPath, branchName = 'main', maxLines = 20) {
   return gitLog(repoPath, branchName, maxLines).join('\n');
 }
@@ -83,4 +87,5 @@ module.exports = {
   gitCheckoutAtTag,
   getCommitForTag,
   getLastCommitOfABranch,
+  pushBranchToRemote,
 };
