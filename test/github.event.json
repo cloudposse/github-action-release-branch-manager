@@ -50,7 +50,7 @@
                 "published_at": "2023-04-12T14:27:08Z",
                 "tag_name": "1.0.0",
                 "tarball_url": "https://api.github.com/repos/cloudposse/github-action-release-branch-manager-test-repo/tarball/9.1.0",
-                "target_commitish": "main",
+                "target_commitish": "master",
                 "upload_url": "https://uploads.github.com/repos/cloudposse/github-action-release-branch-manager-test-repo/releases/99153692/assets{?name,label}",
                 "url": "https://api.github.com/repos/cloudposse/github-action-release-branch-manager-test-repo/releases/99153692",
                 "zipball_url": "https://api.github.com/repos/cloudposse/github-action-release-branch-manager-test-repo/zipball/9.1.0"
@@ -70,7 +70,7 @@
                 "contents_url": "https://api.github.com/repos/cloudposse/github-action-release-branch-manager-test-repo/contents/{+path}",
                 "contributors_url": "https://api.github.com/repos/cloudposse/github-action-release-branch-manager-test-repo/contributors",
                 "created_at": "2023-01-25T11:47:34Z",
-                "default_branch": "main",
+                "default_branch": "master",
                 "deployments_url": "https://api.github.com/repos/cloudposse/github-action-release-branch-manager-test-repo/deployments",
                 "description": "Zinovii's playground",
                 "disabled": false,

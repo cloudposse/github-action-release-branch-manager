@@ -2,7 +2,7 @@ const fs = require('fs');
 const semver = require('semver');
 const github = require('@actions/github');
 const log4js = require('log4js');
-const gitUtils = require('../src/git_utils.js');
+const GitWrapper = require('../src/git_wrapper.js');
 
 const logLevel = process.env.LOG_LEVEL || 'info';
 
@@ -82,8 +82,9 @@ async function main(repoPath, contextFile = null, doPush = true) {
   try {
     const context = await loadContext(contextFile);
     const defaultBranch = getDefaultBranch(context);
+    const gitWrapper = new GitWrapper(repoPath);
 
-    const allTags = gitUtils.getAllTags(repoPath);
+    const allTags = await gitWrapper.getAllTags();
     logger.debug(`All available tags:\n${allTags.join('\n')}`);
 
     const latestSemVerTagsPerMajor = getLatestSemVerTagsForPerMajor(allTags);
@@ -105,7 +106,7 @@ async function main(repoPath, contextFile = null, doPush = true) {
 
     for (const [major, tag] of latestSemVerTagsPerMajor) {
       const releaseBranch = `${RELEASE_BRANCH_PREFIX}${major}`;
-      const releaseBranchExists = gitUtils.doesBranchExist(repoPath, releaseBranch);
+      const releaseBranchExists = await gitWrapper.doesBranchExist(releaseBranch);
 
       if (releaseBranchExists) {
         logger.info(`Release branch '${releaseBranch}' for major tag ${major} already exists. Skipping.`);
@@ -117,14 +118,14 @@ async function main(repoPath, contextFile = null, doPush = true) {
         continue;
       }
 
-      gitUtils.gitCheckoutAtTag(repoPath, tag);
-      gitUtils.createBranch(repoPath, releaseBranch);
+      await gitWrapper.checkout(tag);
+      await gitWrapper.createBranch(releaseBranch, tag);
 
       if (doPush) {
-        gitUtils.pushBranchToRemote(repoPath, releaseBranch);
+        await gitWrapper.pushToRemote(releaseBranch);
       }
 
-      gitUtils.checkoutBranch(repoPath, defaultBranch);
+      await gitWrapper.checkout(defaultBranch);
 
       responseData[releaseBranch] = tag;
 

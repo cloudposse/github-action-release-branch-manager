@@ -28,19 +28,28 @@ runs:
 
     - name: Install Node Dependencies
       shell: bash
-      run: |
-        cd ${{ github.action_path }}
-        npm install
+      working-directory: ${{ github.action_path }}
+      run: npm install
 
     - name: Run Release Branch Manager
-      shell: bash
+      uses: actions/github-script@v6
       id: run_release_branch_manager
-      run: |
-        cd ${{ github.action_path }}
-        export LOG_LEVEL='${{ inputs.log-level }}'
-        node index.js $GITHUB_WORKSPACE
+      env:
+        LOG_LEVEL: '${{ inputs.log-level }}'
+        GITHUB_ACTION_PATH: '${{github.action_path}}'
+        WORKING_DIRECTORY: '${{ github.workspace }}'
+      with:
+        script: |
+          const { main } = require(process.env.GITHUB_ACTION_PATH + '/src/app.js');
 
-    - name: Get the output
-      shell: bash
-      run: |
-        echo "${{ steps.run_release_branch_manager.outputs.response }}"
+          main(process.env.WORKING_DIRECTORY)
+            .then((response) => {
+              if (response.succeeded) {
+                core.setOutput('response', JSON.stringify(response));
+              } else {
+                core.setFailed(response.message);
+              }
+            })
+            .catch((error) => {
+              core.setFailed(error);
+            });

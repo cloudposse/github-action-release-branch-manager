@@ -60,9 +60,11 @@ It's 100% Open Source and licensed under the [APACHE2](LICENSE).
 
 On publishing new major release `N` branch for previous release `N-1` will be created.
 
-For example when new release `v5.0.0` with tag `5.0.0` gets published this workflow will create new branch `release/v4`.
+This GitHub Action adopts a streamlined approach to managing release branches, drawing on a trunk-based branching strategy. In this model, the `DEFAULT_BRANCH` consistently represents the most recent release, while release branches are exclusively created for previous major releases, if applicable. This structure simplifies the process for contributors when submitting Pull Requests for bug fixes or backporting modifications to older releases, as it enables them to target a specific major release.
 
-This action requires repository to use SemVer versioning.
+**How it works:** upon publishing a new major release `N`, a corresponding branch for the previous release `N-1` will be automatically generated. For instance, when the `v5.0.0` release is published with the `5.0.0` tag, this workflow will create a new branch named `release/v4`.
+
+This action requires GitHub releases to follow the [SemVer versioning](https://semver.org/) scheme.
 
 
 
@@ -72,7 +74,7 @@ This action requires repository to use SemVer versioning.
 
 
 
-Example of workflow that can be added to repository.
+Example of workflow that that will create major release tags. To use it, just add this workflow to your `.github/workflows` directory. 
 
 ```yaml
   name: Manager Release Branch
@@ -129,6 +131,8 @@ Are you using this project or any of our other projects? Consider [leaving a tes
 
 Check out these related projects.
 
+- [Major Release Tagger GitHub Action](https://github.com/cloudposse/github-action-major-release-tagger) - GitHub Action that automatically generates or updates `v<major-release>` tags every time a new release is published.
+- [Release Label Validator GitHub Action](https://github.com/cloudposse/github-action-release-label-validator) - Verifies labels that are set on Pull Request
 
 
 ## References
@@ -136,7 +140,8 @@ Check out these related projects.
 For additional context, refer to some of these links.
 
 - [Release Drafter GitHub Action](https://github.com/release-drafter/release-drafter) - Drafts your next release notes as pull requests are merged into your default branch.
-- [Release Branch Manager GitHub Action](https://en.wikipedia.org/wiki/Test_harness) - Automatically creates "Long Term Support (LTS)" release branches when new releases are published
+- [Release Branch Manager GitHub Action](https://github.com/cloudposse/github-action-release-branch-manager) - Automatically creates "Long Term Support (LTS)" release branches when new releases are published
+- [Major Release Tagger GitHub Action](https://github.com/cloudposse/github-action-major-release-tagger) - GitHub Action that automatically generates or updates `v<major-release>` tags every time a new release is published.
 
 
 ## Help
