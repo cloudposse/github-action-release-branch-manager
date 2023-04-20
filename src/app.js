@@ -78,7 +78,7 @@ function getLatestSemVerTagsForPerMajor(tags) {
   return latestTagsPerMajorVersion;
 }
 
-async function main(repoPath, contextFile = null, doPush = true) {
+async function main(repoPath, doPush = true, contextFile = null) {
   try {
     const context = await loadContext(contextFile);
     const defaultBranch = getDefaultBranch(context);

@@ -26,6 +26,9 @@ jobs:
         id: current
         with:
           log-level: 'debug'
+          git-user-name: 'Test User'
+          git-user-email: 'test@example.com'
+          dry-run: 'true'
 
     outputs:
       response: ${{ steps.current.outputs.response }}
