@@ -48,11 +48,11 @@ runs:
       working-directory: ${{ github.action_path }}
       run: npm install
 
-    - name: Setup Git Config
-      shell: bash
-      run: |
-        git config --global user.name '${{ inputs.git-user-name }}'
-        git config --global user.email '${{ inputs.git-user-email }}'
+    # - name: Setup Git Config
+    #   shell: bash
+    #   run: |
+    #     git config --global user.name '${{ inputs.git-user-name }}'
+    #     git config --global user.email '${{ inputs.git-user-email }}'
 
     - name: Run Release Branch Manager
       uses: actions/github-script@v6
