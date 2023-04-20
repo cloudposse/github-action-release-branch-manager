@@ -14,7 +14,7 @@ class GitWrapper {
   async initialize(repoPath, repoFullName, token) {
     this.git = simpleGit(repoPath);
 
-    const remotes = await git.getRemotes(true);
+    const remotes = await this.git.getRemotes(true);
 
     if (token != null) {
       console.log(`https://${token}@github.com/${repoFullName}.git`);
