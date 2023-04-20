@@ -41,9 +41,6 @@ usage: |-
   ```yaml
     name: Manager Release Branch
 
-    permissions:
-      contents: write
-
     on:
       release:
         types:
@@ -54,8 +51,6 @@ usage: |-
         runs-on: ubuntu-latest
         steps:
           - uses: cloudposse/github-action-release-branch-manager@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   ```
 
 references:
