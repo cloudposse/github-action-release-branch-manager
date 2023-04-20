@@ -15,7 +15,10 @@ class GitWrapper {
     this.git = simpleGit(repoPath);
 
     if (token != null) {
+      console.log(`https://${token}@github.com/${repoFullName}.git`);
       await this.git.remote(['set-url', 'origin', `https://${token}@github.com/${repoFullName}.git`]);
+    } else {
+      console.log('no token passed');
     }
   }
 
