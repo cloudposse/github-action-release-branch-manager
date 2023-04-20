@@ -18,17 +18,6 @@ class GitWrapper {
       console.log(`https://${token}@github.com/${repoFullName}.git`);
       await this.git.remote(['set-url', 'origin', `https://${token}@github.com/${repoFullName}.git`]);
     }
-
-    const remotes = await this.git.getRemotes(true);
-
-    // Find the origin remote
-    const originRemote = remotes.find((remote) => remote.name === 'origin');
-
-    if (originRemote) {
-      console.log('Origin URL:', originRemote.refs.push);
-    } else {
-      console.log('No origin remote found');
-    }
   }
 
   async getAllTags() {
