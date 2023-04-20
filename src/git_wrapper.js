@@ -14,11 +14,20 @@ class GitWrapper {
   async initialize(repoPath, repoFullName, token) {
     this.git = simpleGit(repoPath);
 
+    const remotes = await git.getRemotes(true);
+
     if (token != null) {
       console.log(`https://${token}@github.com/${repoFullName}.git`);
       await this.git.remote(['set-url', 'origin', `https://${token}@github.com/${repoFullName}.git`]);
+    }
+
+    // Find the origin remote
+    const originRemote = remotes.find((remote) => remote.name === 'origin');
+
+    if (originRemote) {
+      console.log('Origin URL:', originRemote.refs.push);
     } else {
-      console.log('no token passed');
+      console.log('No origin remote found');
     }
   }
 
