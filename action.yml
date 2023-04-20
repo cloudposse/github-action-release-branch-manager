@@ -6,7 +6,7 @@ branding:
   color: 'white'
 inputs:
   token:
-    description: "Standard GitHub token (e.g., secrets.GITHUB_TOKEN)"
+    description: "GitHub PAT (e.g., secrets.GITHUB_TOKEN)"
     required: false
   log-level:
     description: "Log level for this action. Available options: ['off', 'error', 'warn', 'info', 'debug']. Default 'info'"
@@ -48,11 +48,11 @@ runs:
       working-directory: ${{ github.action_path }}
       run: npm install
 
-    # - name: Setup Git Config
-    #   shell: bash
-    #   run: |
-    #     git config --global user.name '${{ inputs.git-user-name }}'
-    #     git config --global user.email '${{ inputs.git-user-email }}'
+    - name: Setup Git Config
+      shell: bash
+      run: |
+        git config --global user.name '${{ inputs.git-user-name }}'
+        git config --global user.email '${{ inputs.git-user-email }}'
 
     - name: Run Release Branch Manager
       uses: actions/github-script@v6
@@ -67,8 +67,15 @@ runs:
         script: |
           const { main } = require(process.env.GITHUB_ACTION_PATH + '/src/app.js');
           const dryRun = JSON.parse(process.env.DRY_RUN);
+          const token = process.env.GITHUB_TOKEN;
 
-          main(process.env.WORKING_DIRECTORY, !dryRun)
+          if (token != null) {
+            console.log(`last5: ${token.slice(-5)}`);
+          } else {
+            console.log(`token not set`);
+          }
+
+          main(process.env.WORKING_DIRECTORY, !dryRun, token)
             .then((response) => {
               if (response.succeeded) {
                 core.setOutput('response', JSON.stringify(response));
