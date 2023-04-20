@@ -79,9 +79,6 @@ Example of workflow that that will create major release tags. To use it, just ad
 ```yaml
   name: Manager Release Branch
 
-  permissions:
-    contents: write
-
   on:
     release:
       types:
@@ -92,8 +89,6 @@ Example of workflow that that will create major release tags. To use it, just ad
       runs-on: ubuntu-latest
       steps:
         - uses: cloudposse/github-action-release-branch-manager@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 
@@ -107,6 +102,9 @@ Example of workflow that that will create major release tags. To use it, just ad
 
 | Name | Description | Default | Required |
 |------|-------------|---------|----------|
+| dry-run | Run action without pushing changes to upstream | false | false |
+| git-user-email | Git user email that will be used for git config | actions-bot@users.noreply.github.com | false |
+| git-user-name | Git user name that will be used for git config | actions-bot | false |
 | log-level | Log level for this action. Available options: ['off', 'error', 'warn', 'info', 'debug']. Default 'info' | info | false |
 
 
