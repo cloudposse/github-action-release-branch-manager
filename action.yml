@@ -6,8 +6,9 @@ branding:
   color: 'white'
 inputs:
   token:
-    description: "GitHub PAT (e.g., secrets.GITHUB_TOKEN)"
+    description: "GitHub Personal Access Token (PAT) used to work with repository. Default: ${{ github.token }}"
     required: false
+    default: '${{ github.token }}'
   log-level:
     description: "Log level for this action. Available options: ['off', 'error', 'warn', 'info', 'debug']. Default 'info'"
     required: false
@@ -66,15 +67,9 @@ runs:
         script: |
           const { main } = require(process.env.GITHUB_ACTION_PATH + '/src/app.js');
           const dryRun = JSON.parse(process.env.DRY_RUN);
-          const token = process.env.GITHUB_TOKEN;
+          // const token = process.env.GITHUB_TOKEN;
 
-          if (token != null) {
-            console.log(`last5: ${token.slice(-5)}`);
-          } else {
-            console.log(`token not set`);
-          }
-
-          main(process.env.WORKING_DIRECTORY, !dryRun, token)
+          main(process.env.WORKING_DIRECTORY, !dryRun, null)
             .then((response) => {
               if (response.succeeded) {
                 core.setOutput('response', JSON.stringify(response));
