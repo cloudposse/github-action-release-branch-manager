@@ -8,7 +8,6 @@
 | git-user-email | Git user email that will be used for git config | actions-bot@users.noreply.github.com | false |
 | git-user-name | Git user name that will be used for git config | actions-bot | false |
 | log-level | Log level for this action. Available options: ['off', 'error', 'warn', 'info', 'debug']. Default 'info' | info | false |
-| token | GitHub Personal Access Token (PAT) used to work with repository | N/A | true |
 
 
 ## Outputs
