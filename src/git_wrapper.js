@@ -15,12 +15,26 @@ class GitWrapper {
       const { all: localBranches } = await this.git.branchLocal();
       const existsLocally = localBranches.includes(branchName);
 
+      console.log(`Local branches: ${Array.from(localBranches).join(', ')}`);
+
       if (existsLocally) {
+        console.log(`Branch ${branchName} exist locally`);
         return true;
       }
 
       const { all: remoteBranches } = await this.git.branch();
       const existsRemotely = remoteBranches.includes(`origin/${branchName}`);
+
+      console.log(`Remote branches: ${Array.from(remoteBranches).join(', ')}`);
+
+      if (existsRemotely) {
+        console.log(`Branch ${branchName} exist remotelly`);
+        return true;
+      }
+
+      if (!existsLocally && !existsRemotely) {
+        console.log(`Branch ${branchName} does not exist`);
+      }
 
       return existsRemotely;
     } catch (err) {
