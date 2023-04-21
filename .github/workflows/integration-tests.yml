@@ -1,0 +1,33 @@
+name: "Integration Tests"
+
+on:
+  workflow_dispatch: {}
+
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install Node Dependencies
+        run: |
+          make install-deps
+
+      - name: Lint
+        run: |
+          make jslint
+
+      - name: Run Tests
+        env:
+          LOG_LEVEL: 'debug'
+        run: |
+          make test

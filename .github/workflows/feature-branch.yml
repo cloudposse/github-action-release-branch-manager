@@ -12,4 +12,4 @@ jobs:
       repository: "${{ github.event.repository.name }}"
       ref: "${{ github.event.pull_request.head.ref  }}"
     secrets:
-      github-private-actions-pat: "${{ secrets.PUBLIC_REPO_ACCESS_TOKEN }}"
+      github-private-actions-pat: "${{ secrets.REPO_ACCESS_TOKEN }}"

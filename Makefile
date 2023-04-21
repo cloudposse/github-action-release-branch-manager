@@ -8,3 +8,18 @@ export README_DEPS ?= docs/github-action.md
 ## Lint terraform code
 lint:
 	$(SELF) terraform/install terraform/get-modules terraform/get-plugins terraform/lint terraform/validate
+
+.PHONY: install-deps
+
+install-deps:
+	npm install
+
+.PHONY: jslint
+
+jslint:
+	npm run lint
+
+.PHONY: test
+
+test:
+	npm test

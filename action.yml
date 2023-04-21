@@ -1,23 +1,81 @@
-name: 'Example composite GitHub action'
-description: 'Example composite GitHub action'
+name: 'Release Branch Manager GitHub Action'
+description: 'Creates release branch based on tag major version'
 author: hello@cloudposse.com
 branding:
   icon: 'file'
   color: 'white'
 inputs:
-  param1:
-    required: true
-    description: "Input parameter placeholder"
-    default: "true"
+  log-level:
+    description: "Log level for this action. Available options: ['off', 'error', 'warn', 'info', 'debug']. Default 'info'"
+    required: false
+    default: "info"
+  git-user-name:
+    description: "Git user name that will be used for git config"
+    required: false
+    default: "actions-bot"
+  git-user-email:
+    description: "Git user email that will be used for git config"
+    required: false
+    default: "actions-bot@users.noreply.github.com"
+  dry-run:
+    description: "Run action without pushing changes to upstream"
+    required: false
+    default: "false"
+  minimal-version:
+    description: "Minimal 'major' version that release branch creation should start from"
+    required: false
+    default: "1"
 outputs:
-  result1:
-    description: "Output result placeholder"
-    value: "${{ steps.context.outputs.action-result }}"
+  response:
+    description: 'Response in json format for example: {"succeeded":true,"reason":"CREATED_BRANCHES","message":"Successfully created release branches","data":{"release/v3":"3.1.0","release/v2":"2.0.0","release/v1":"1.1.0"}}'
+    value: ${{ steps.run_release_branch_manager.outputs.response }}
 runs:
   using: "composite"
   steps:
-    - id: context
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Setup Node
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16
+
+    - name: Install Node Dependencies
+      shell: bash
+      working-directory: ${{ github.action_path }}
+      run: npm install
+
+    - name: Setup Git Config
       shell: bash
       run: |
-          echo "::set-output name=action-result::${{ inputs.param1 }}"
+        git config --global user.name '${{ inputs.git-user-name }}'
+        git config --global user.email '${{ inputs.git-user-email }}'
 
+    - name: Run Release Branch Manager
+      uses: actions/github-script@v6
+      id: run_release_branch_manager
+      env:
+        LOG_LEVEL: '${{ inputs.log-level }}'
+        GITHUB_ACTION_PATH: '${{github.action_path}}'
+        WORKING_DIRECTORY: '${{ github.workspace }}'
+        DRY_RUN: '${{ inputs.dry-run }}'
+        MININAL_VERSION: '${{ inputs.minimal-version }}'
+      with:
+        script: |
+          const { main } = require(process.env.GITHUB_ACTION_PATH + '/src/app.js');
+          const dryRun = JSON.parse(process.env.DRY_RUN);
+          const minimalVersion = parseInt(process.env.MININAL_VERSION);
+
+          main(process.env.WORKING_DIRECTORY, minimalVersion, !dryRun, null)
+            .then((response) => {
+              if (response.succeeded) {
+                core.setOutput('response', JSON.stringify(response));
+              } else {
+                core.setFailed(response.message);
+              }
+            })
+            .catch((error) => {
+              core.setFailed(error);
+            });
