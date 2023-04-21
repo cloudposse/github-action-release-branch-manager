@@ -32,10 +32,6 @@ function getDefaultBranch(context) {
   return context.payload.repository.default_branch;
 }
 
-function getRepoFullName(context) {
-  return context.payload.repository.full_name;
-}
-
 function readFile(contextFile) {
   return new Promise((resolve, reject) => {
     fs.readFile(contextFile, 'utf8', (error, data) => {
@@ -82,11 +78,11 @@ function getLatestSemVerTagsForPerMajor(tags) {
   return latestTagsPerMajorVersion;
 }
 
-async function main(repoPath, doPush = true, token = null, contextFile = null) {
+async function main(repoPath, doPush = true, contextFile = null) {
   try {
     const context = await loadContext(contextFile);
     const defaultBranch = getDefaultBranch(context);
-    const gitWrapper = await GitWrapper.create(repoPath, getRepoFullName(context), token);
+    const gitWrapper = new GitWrapper(repoPath);
 
     const allTags = await gitWrapper.getAllTags();
     logger.debug(`All available tags:\n${allTags.join('\n')}`);

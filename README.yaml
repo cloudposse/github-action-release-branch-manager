@@ -51,6 +51,8 @@ usage: |-
         runs-on: ubuntu-latest
         steps:
           - uses: cloudposse/github-action-release-branch-manager@v1
+            with:
+              token: ${{ secrets.GITHUB_TOKEN }}
   ```
 
 references:

@@ -89,6 +89,8 @@ Example of workflow that that will create major release tags. To use it, just ad
       runs-on: ubuntu-latest
       steps:
         - uses: cloudposse/github-action-release-branch-manager@v1
+          with:
+            token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 
@@ -106,7 +108,7 @@ Example of workflow that that will create major release tags. To use it, just ad
 | git-user-email | Git user email that will be used for git config | actions-bot@users.noreply.github.com | false |
 | git-user-name | Git user name that will be used for git config | actions-bot | false |
 | log-level | Log level for this action. Available options: ['off', 'error', 'warn', 'info', 'debug']. Default 'info' | info | false |
-| token | GitHub Personal Access Token (PAT) used to work with repository. Default: ${{ github.token }} | ${{ github.token }} | false |
+| token | GitHub Personal Access Token (PAT) used to work with repository | N/A | true |
 
 
 ## Outputs

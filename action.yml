@@ -7,7 +7,7 @@ branding:
 inputs:
   token:
     description: "GitHub Personal Access Token (PAT) used to work with repository"
-    required: false
+    required: true
   log-level:
     description: "Log level for this action. Available options: ['off', 'error', 'warn', 'info', 'debug']. Default 'info'"
     required: false
@@ -61,12 +61,10 @@ runs:
         GITHUB_ACTION_PATH: '${{github.action_path}}'
         WORKING_DIRECTORY: '${{ github.workspace }}'
         DRY_RUN: '${{ inputs.dry-run }}'
-        TOKEN: '${{ inputs.token }}'
       with:
         script: |
           const { main } = require(process.env.GITHUB_ACTION_PATH + '/src/app.js');
           const dryRun = JSON.parse(process.env.DRY_RUN);
-          // const token = process.env.GITHUB_TOKEN;
 
           main(process.env.WORKING_DIRECTORY, !dryRun, null)
             .then((response) => {

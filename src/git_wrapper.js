@@ -1,23 +1,8 @@
 const simpleGit = require('simple-git');
 
 class GitWrapper {
-  constructor() {
-    this.git = null;
-  }
-
-  static async create(repoPath, repoFullName = null, token = null) {
-    const instance = new GitWrapper();
-    await instance.initialize(repoPath, repoFullName, token);
-    return instance;
-  }
-
-  async initialize(repoPath, repoFullName, token) {
+  constructor(repoPath) {
     this.git = simpleGit(repoPath);
-
-    if (token != null) {
-      console.log(`https://${token}@github.com/${repoFullName}.git`);
-      await this.git.remote(['set-url', 'origin', `https://${token}@github.com/${repoFullName}.git`]);
-    }
   }
 
   async getAllTags() {
