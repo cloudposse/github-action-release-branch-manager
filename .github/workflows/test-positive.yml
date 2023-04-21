@@ -29,7 +29,6 @@ jobs:
           git-user-name: 'Test User'
           git-user-email: 'test@example.com'
           dry-run: 'true'
-          token: ${{ secrets.GITHUB_TOKEN }}
 
     outputs:
       response: ${{ steps.current.outputs.response }}
