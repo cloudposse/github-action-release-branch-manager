@@ -69,7 +69,7 @@ function getLatestSemVerTagsForPerMajor(tags) {
   return latestTagsPerMajorVersion;
 }
 
-async function main(repoPath, doPush = true, contextFile = null) {
+async function main(repoPath, minimalVersion, doPush = true, contextFile = null) {
   try {
     const context = await loadContext(contextFile);
     const defaultBranch = getDefaultBranch(context);
@@ -101,6 +101,11 @@ async function main(repoPath, doPush = true, contextFile = null) {
 
       if (releaseBranchExists) {
         logger.info(`Release branch '${releaseBranch}' for major tag ${major} already exists. Skipping.`);
+        continue;
+      }
+
+      if (major < minimalVersion) {
+        logger.info(`Skipping creation of release branch '${releaseBranch}' for tag (${tag}) as it is below the minimal version.`);
         continue;
       }
 

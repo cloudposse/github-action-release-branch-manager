@@ -32,7 +32,7 @@ test('no tags', async () => {
 
   // test
   logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
-  response = await main(repoPath, false, GITHUB_EVENT_FILE);
+  response = await main(repoPath, 0, false, GITHUB_EVENT_FILE);
   logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
 
   // verify
@@ -55,7 +55,7 @@ test('only 0 level tags', async () => {
 
   // test
   logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
-  response = await main(repoPath, false, GITHUB_EVENT_FILE);
+  response = await main(repoPath, 0, false, GITHUB_EVENT_FILE);
   logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
 
   // verify
@@ -78,7 +78,7 @@ test('only 1 level tags', async () => {
 
   // test
   logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
-  response = await main(repoPath, false, GITHUB_EVENT_FILE);
+  response = await main(repoPath, 0, false, GITHUB_EVENT_FILE);
   logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
 
   // verify
@@ -111,7 +111,7 @@ test('release branches exist for all tags', async () => {
 
   // test
   logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
-  response = await main(repoPath, false, GITHUB_EVENT_FILE);
+  response = await main(repoPath, 0, false, GITHUB_EVENT_FILE);
   logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
 
   // verify
@@ -137,7 +137,7 @@ test('create release branch for tag', async () => {
 
   // test
   logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
-  response = await main(repoPath, false, GITHUB_EVENT_FILE);
+  response = await main(repoPath, 0, false, GITHUB_EVENT_FILE);
   logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
 
   // verify
@@ -174,7 +174,7 @@ test('create multiple release branches 1', async () => {
 
   // test
   logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
-  const response = await main(repoPath, false, GITHUB_EVENT_FILE);
+  const response = await main(repoPath, 0, false, GITHUB_EVENT_FILE);
   logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
 
   logger.info(JSON.stringify(response));
@@ -218,7 +218,7 @@ test('create multiple release branches 2', async () => {
 
   // test
   logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
-  const response = await main(repoPath, false, GITHUB_EVENT_FILE);
+  const response = await main(repoPath, 0, false, GITHUB_EVENT_FILE);
   logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
 
   // verify
@@ -226,4 +226,46 @@ test('create multiple release branches 2', async () => {
   assert.strictEqual(response.reason, RESPONSE_REASON.CREATED_BRANCHES);
   assert.strictEqual(Object.keys(response.data).length, 1);
   assert.strictEqual(response.data['release/v2'], '2.0.0');
+});
+
+test('minimal version is set', async () => {
+  // prepare
+  const repoPath = createRepoDir();
+  const gitWrapper = new GitWrapper(repoPath);
+
+  await gitWrapper.initializeGitRepo();
+  await createFileAndCommit(gitWrapper, repoPath);
+  const sha1 = await createFileAndCommit(gitWrapper, repoPath);
+  await gitWrapper.createTag('1.0.0', sha1, false);
+  const sha2 = await createFileAndCommit(gitWrapper, repoPath);
+  await gitWrapper.createTag('1.1.0', sha2, false);
+  await createFileAndCommit(gitWrapper, repoPath);
+  const sha3 = await createFileAndCommit(gitWrapper, repoPath);
+  await gitWrapper.createTag('2.0.0', sha3, false);
+  await createFileAndCommit(gitWrapper, repoPath);
+  const sha4 = await createFileAndCommit(gitWrapper, repoPath);
+  await gitWrapper.createTag('3.0.0', sha4, false);
+  const sha5 = await createFileAndCommit(gitWrapper, repoPath);
+  await gitWrapper.createTag('3.1.0', sha5, false);
+  await createFileAndCommit(gitWrapper, repoPath);
+  const sha6 = await createFileAndCommit(gitWrapper, repoPath);
+  await gitWrapper.createTag('4.0.0', sha6, false);
+
+  // test
+  logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
+  const response = await main(repoPath, 2, false, GITHUB_EVENT_FILE);
+  logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
+
+  logger.info(JSON.stringify(response));
+
+  // verify
+  assert.strictEqual(response.succeeded, true);
+  assert.strictEqual(response.reason, RESPONSE_REASON.CREATED_BRANCHES);
+  assert.strictEqual(Object.keys(response.data).length, 2);
+  assert.strictEqual(response.data['release/v2'], '2.0.0');
+  assert.strictEqual(response.data['release/v3'], '3.1.0');
+  assert.strictEqual(await gitWrapper.getSHAForTag('2.0.0'), sha3);
+  assert.strictEqual(await gitWrapper.getLastCommitOfABranch('release/v2'), sha3);
+  assert.strictEqual(await gitWrapper.getSHAForTag('3.1.0'), sha5);
+  assert.strictEqual(await gitWrapper.getLastCommitOfABranch('release/v3'), sha5);
 });
