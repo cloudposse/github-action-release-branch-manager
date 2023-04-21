@@ -6,9 +6,8 @@ branding:
   color: 'white'
 inputs:
   token:
-    description: "GitHub Personal Access Token (PAT) used to work with repository. Default: ${{ github.token }}"
+    description: "GitHub Personal Access Token (PAT) used to work with repository"
     required: false
-    default: '${{ github.token }}'
   log-level:
     description: "Log level for this action. Available options: ['off', 'error', 'warn', 'info', 'debug']. Default 'info'"
     required: false
