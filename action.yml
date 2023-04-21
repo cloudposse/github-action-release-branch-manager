@@ -61,7 +61,7 @@ runs:
         GITHUB_ACTION_PATH: '${{github.action_path}}'
         WORKING_DIRECTORY: '${{ github.workspace }}'
         DRY_RUN: '${{ inputs.dry-run }}'
-        MININAL_VERSION: '${{ input.minimal-version }}'
+        MININAL_VERSION: '${{ inputs.minimal-version }}'
       with:
         script: |
           const { main } = require(process.env.GITHUB_ACTION_PATH + '/src/app.js');
