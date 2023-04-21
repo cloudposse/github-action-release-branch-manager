@@ -58,8 +58,6 @@ It's 100% Open Source and licensed under the [APACHE2](LICENSE).
 
 ## Introduction
 
-On publishing new major release `N` branch for previous release `N-1` will be created.
-
 This GitHub Action adopts a streamlined approach to managing release branches, drawing on a trunk-based branching strategy. In this model, the `DEFAULT_BRANCH` consistently represents the most recent release, while release branches are exclusively created for previous major releases, if applicable. This structure simplifies the process for contributors when submitting Pull Requests for bug fixes or backporting modifications to older releases, as it enables them to target a specific major release.
 
 **How it works:** upon publishing a new major release `N`, a corresponding branch for the previous release `N-1` will be automatically generated.
