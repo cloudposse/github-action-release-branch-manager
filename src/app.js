@@ -1,17 +1,8 @@
 const fs = require('fs');
 const semver = require('semver');
 const github = require('@actions/github');
-const log4js = require('log4js');
 const GitWrapper = require('../src/git_wrapper.js');
-
-const logLevel = process.env.LOG_LEVEL || 'info';
-
-log4js.configure({
-  appenders: { console: { type: 'console' } },
-  categories: { default: { appenders: ['console'], level: logLevel } },
-});
-
-const logger = log4js.getLogger();
+const { logger } = require('./utils.js');
 
 const RELEASE_BRANCH_PREFIX = 'release/v';
 const RESPONSE_REASON = {

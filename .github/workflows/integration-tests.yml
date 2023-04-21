@@ -27,5 +27,7 @@ jobs:
           make jslint
 
       - name: Run Tests
+        env:
+          LOG_LEVEL: 'debug'
         run: |
           make test

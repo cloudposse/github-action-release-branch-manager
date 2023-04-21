@@ -5,18 +5,10 @@ const path = require('path');
 const { main, RESPONSE_REASON } = require('../src/app');
 const { v4: uuidv4 } = require('uuid');
 const GitWrapper = require('../src/git_wrapper.js');
+const { logger } = require('../src/utils.js');
 
 const TMP_DIR = os.tmpdir();
 const GITHUB_EVENT_FILE = 'test/github.event.json';
-
-const log4js = require('log4js');
-
-log4js.configure({
-  appenders: { console: { type: 'console' } },
-  categories: { default: { appenders: ['console'], level: 'debug' } },
-});
-
-const logger = log4js.getLogger();
 
 function createRepoDir() {
   const repoPath = `${TMP_DIR}/${uuidv4()}`;
