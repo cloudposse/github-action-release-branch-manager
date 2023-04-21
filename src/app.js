@@ -106,7 +106,7 @@ async function main(repoPath, doPush = true, contextFile = null) {
 
     for (const [major, tag] of latestSemVerTagsPerMajor) {
       const releaseBranch = `${RELEASE_BRANCH_PREFIX}${major}`;
-      const releaseBranchExists = await gitWrapper.doesBranchExist(releaseBranch);
+      const releaseBranchExists = await gitWrapper.branchExists(releaseBranch);
 
       if (releaseBranchExists) {
         logger.info(`Release branch '${releaseBranch}' for major tag ${major} already exists. Skipping.`);

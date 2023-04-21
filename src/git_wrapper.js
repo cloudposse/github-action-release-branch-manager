@@ -10,11 +10,21 @@ class GitWrapper {
     return tags.trim().split('\n');
   }
 
-  async doesBranchExist(branchName) {
+  async branchExists(branchName) {
     try {
-      await this.git.revparse(['--verify', branchName]);
-      return true;
-    } catch (error) {
+      const { all: localBranches } = await this.git.branchLocal();
+      const existsLocally = localBranches.includes(branchName);
+
+      if (existsLocally) {
+        return true;
+      }
+
+      const { all: remoteBranches } = await this.git.branch();
+      const existsRemotely = remoteBranches.includes(`origin/${branchName}`);
+
+      return existsRemotely;
+    } catch (err) {
+      console.error(`Error checking if branch '${branchName}' exists:`, err);
       return false;
     }
   }
