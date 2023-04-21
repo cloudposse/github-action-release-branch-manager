@@ -1,4 +1,14 @@
 const simpleGit = require('simple-git');
+const log4js = require('log4js');
+
+const logLevel = process.env.LOG_LEVEL || 'info';
+
+log4js.configure({
+  appenders: { console: { type: 'console' } },
+  categories: { default: { appenders: ['console'], level: logLevel } },
+});
+
+const logger = log4js.getLogger();
 
 class GitWrapper {
   constructor(repoPath) {
@@ -15,30 +25,30 @@ class GitWrapper {
       const { all: localBranches } = await this.git.branchLocal();
       const existsLocally = localBranches.includes(branchName);
 
-      console.log(`Local branches: ${Array.from(localBranches).join(', ')}`);
+      logger.debug(`Local branches:\n${Array.from(localBranches).join('\n')}`);
 
       if (existsLocally) {
-        console.log(`Branch ${branchName} exist locally`);
+        logger.debug(`Branch exist locally: ${branchName}`);
         return true;
       }
 
       const { all: remoteBranches } = await this.git.branch();
       const existsRemotely = remoteBranches.includes(`origin/${branchName}`) || remoteBranches.includes(`remotes/origin/${branchName}`);
 
-      console.log(`Remote branches: ${Array.from(remoteBranches).join(', ')}`);
+      logger.debug(`Remote branches:\n${Array.from(remoteBranches).join('\n')}`);
 
       if (existsRemotely) {
-        console.log(`Branch ${branchName} exist remotelly`);
+        logger.debug(`Branch exist remotelly: ${branchName}`);
         return true;
       }
 
       if (!existsLocally && !existsRemotely) {
-        console.log(`Branch ${branchName} does not exist`);
+        logger.debug(`Branch does not exist: ${branchName}`);
       }
 
       return existsRemotely;
     } catch (err) {
-      console.error(`Error checking if branch '${branchName}' exists:`, err);
+      logger.error(`Error checking if branch '${branchName}' exists:`, err);
       return false;
     }
   }
