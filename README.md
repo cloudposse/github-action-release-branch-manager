@@ -62,7 +62,43 @@ On publishing new major release `N` branch for previous release `N-1` will be cr
 
 This GitHub Action adopts a streamlined approach to managing release branches, drawing on a trunk-based branching strategy. In this model, the `DEFAULT_BRANCH` consistently represents the most recent release, while release branches are exclusively created for previous major releases, if applicable. This structure simplifies the process for contributors when submitting Pull Requests for bug fixes or backporting modifications to older releases, as it enables them to target a specific major release.
 
-**How it works:** upon publishing a new major release `N`, a corresponding branch for the previous release `N-1` will be automatically generated. For instance, when the `v5.0.0` release is published with the `5.0.0` tag, this workflow will create a new branch named `release/v4`.
+**How it works:** upon publishing a new major release `N`, a corresponding branch for the previous release `N-1` will be automatically generated.
+
+Imagine you have tags like this in your repo:
+
+```
+0.1.0
+0.2.0
+1.0.0
+1.1.0
+1.2.0
+1.2.1
+2.0.0
+2.1.0
+2.2.0
+3.0.0
+3.1.0   main
+```
+
+Upon the first release published event, the "release branch manager" will generate new branches named `release/vN-1`, where N corresponds to the latest tag of each major release. In this case, several new branches will be created:
+
+```
+0.1.0
+0.2.0   release/v0
+1.0.0
+1.1.0
+1.2.0
+1.2.1   release/v1
+2.0.0
+2.1.0
+2.2.0   release/v2
+3.0.0
+3.1.0   main
+```
+
+Note that `3.1.0` is latest tag and release branch manager wouldn't create release branch because latest major release is maintained in `main` branch.
+
+If you wish to make changes to `2.2.0`, you must create a pull request for the `release/v2` branch and generate a corresponding release/tag with a major version of `2`, for example, `2.3.0`.
 
 This action requires GitHub releases to follow the [SemVer versioning](https://semver.org/) scheme.
 
