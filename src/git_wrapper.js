@@ -23,7 +23,7 @@ class GitWrapper {
       }
 
       const { all: remoteBranches } = await this.git.branch();
-      const existsRemotely = remoteBranches.includes(`origin/${branchName}`);
+      const existsRemotely = remoteBranches.includes(`origin/${branchName}`) || remoteBranches.includes(`remotes/origin/${branchName}`);
 
       console.log(`Remote branches: ${Array.from(remoteBranches).join(', ')}`);
 
