@@ -64,6 +64,13 @@ class GitHubWrapper {
     return null;
   }
 
+  // curl -X PATCH \
+  //   -H "Accept: application/vnd.github+json" \
+  //   -H "X-GitHub-Api-Version: 2022-11-28" \
+  //   -H "Authorization: Bearer xxxx" \
+  //   https://api.github.com/repos/cloudposse/zinovii-sandbox-01/releases/100341986 \
+  //   -d '{"target_commitish": "release/v6"}'
+
   async updateTargetCommitish(releaseId, targetCommitish) {
     const url = `https://api.github.com/repos/${this.repoFullName}/releases/${releaseId}`;
 
@@ -77,6 +84,10 @@ class GitHubWrapper {
       const payload = {
         target_commitish: targetCommitish,
       };
+
+      logger.debug(`Url: ${url}`);
+      logger.debug(`Headers: ${JSON.stringify(headers)}`);
+      logger.debug(`Payload: ${JSON.stringify(payload)}`);
 
       const response = await axios.patch(url, payload, { headers });
 
