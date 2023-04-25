@@ -69,16 +69,12 @@ runs:
         TOKEN: ${{ inputs.token || github.token }}
       with:
         script: |
-          const { context, core, github } = require('@actions/github');
-          const { event } = github;
           const { main } = require(process.env.GITHUB_ACTION_PATH + '/src/app.js');
           const dryRun = JSON.parse(process.env.DRY_RUN);
           const minimalVersion = parseInt(process.env.MININAL_VERSION);
           const token = process.env.TOKEN;
 
           console.log(JSON.stringify(context));
-          console.log(JSON.stringify(core));
-          console.log(JSON.stringify(github));
 
           main(process.env.WORKING_DIRECTORY, minimalVersion, context, token, !dryRun)
             .then((response) => {
