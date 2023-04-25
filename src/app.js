@@ -97,7 +97,7 @@ async function main(repoPath, minimalVersion, context, token, doPush = true) {
       if (doPush) {
         await gitWrapper.pushToRemote(releaseBranch);
 
-        const release = githubWrapper.findReleaseByTag(tag);
+        const release = await githubWrapper.findReleaseByTag(tag);
 
         if (release != null) {
           if (release.target_commitish !== releaseBranch) {
