@@ -74,8 +74,6 @@ runs:
           const minimalVersion = parseInt(process.env.MININAL_VERSION);
           const token = process.env.TOKEN;
 
-          console.log(JSON.stringify(context));
-
           main(process.env.WORKING_DIRECTORY, minimalVersion, context, token, !dryRun)
             .then((response) => {
               if (response.succeeded) {
