@@ -1,3 +1,4 @@
+const axios = require('axios');
 const { logger } = require('./utils.js');
 
 class GitHubWrapper {
