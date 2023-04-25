@@ -74,6 +74,8 @@ runs:
           const minimalVersion = parseInt(process.env.MININAL_VERSION);
           const token = process.env.TOKEN;
 
+          console.log(JSON.stringify(github.context));
+
           main(process.env.WORKING_DIRECTORY, minimalVersion, github.context, token, !dryRun)
             .then((response) => {
               if (response.succeeded) {
