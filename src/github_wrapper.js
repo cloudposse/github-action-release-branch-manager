@@ -78,10 +78,6 @@ class GitHubWrapper {
         target_commitish: targetCommitish,
       };
 
-      logger.debug(`Url: ${url}`);
-      logger.debug(`Headers: ${JSON.stringify(headers)}`);
-      logger.debug(`Payload: ${JSON.stringify(payload)}`);
-
       const response = await axios.patch(url, payload, { headers });
 
       if (response.status === 200) {

@@ -43,6 +43,20 @@ function getLatestSemVerTagsForPerMajor(tags) {
   return latestTagsPerMajorVersion;
 }
 
+async function updateGitHubRelease(githubWrapper, releaseBranch, tag) {
+  const release = await githubWrapper.findReleaseByTag(tag);
+
+  if (release != null) {
+    if (release.target_commitish !== releaseBranch) {
+      await githubWrapper.updateTargetCommitish(release.id, releaseBranch);
+    } else {
+      logger.info(`Release for tag (${tag}) already exists and has correct target_commitish (${releaseBranch}).`);
+    }
+  } else {
+    await githubWrapper.createReleaseForTag(tag, releaseBranch);
+  }
+}
+
 async function main(repoPath, minimalVersion, context, token, doPush = true) {
   try {
     const defaultBranch = getDefaultBranch(context);
@@ -96,18 +110,7 @@ async function main(repoPath, minimalVersion, context, token, doPush = true) {
 
       if (doPush) {
         await gitWrapper.pushToRemote(releaseBranch);
-
-        const release = await githubWrapper.findReleaseByTag(tag);
-
-        if (release != null) {
-          if (release.target_commitish !== releaseBranch) {
-            await githubWrapper.updateTargetCommitish(release.id, releaseBranch);
-          } else {
-            logger.info(`Release for tag (${tag}) already exists and has correct target_commitish (${releaseBranch}).`);
-          }
-        } else {
-          await githubWrapper.createReleaseForTag(tag, releaseBranch);
-        }
+        await updateGitHubRelease(githubWrapper, releaseBranch, tag);
       }
 
       responseData[releaseBranch] = tag;
