@@ -5,6 +5,9 @@ branding:
   icon: 'file'
   color: 'white'
 inputs:
+  token:
+    description: "GitHub Token used to perform git and GitHub operations"
+    required: false
   log-level:
     description: "Log level for this action. Available options: ['off', 'error', 'warn', 'info', 'debug']. Default 'info'"
     required: false
@@ -36,6 +39,7 @@ runs:
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
+        token: ${{ inputs.token || secrets.GITHUB_TOKEN }}
 
     - name: Setup Node
       uses: actions/setup-node@v3
@@ -62,13 +66,15 @@ runs:
         WORKING_DIRECTORY: '${{ github.workspace }}'
         DRY_RUN: '${{ inputs.dry-run }}'
         MININAL_VERSION: '${{ inputs.minimal-version }}'
+        TOKEN: ${{ inputs.token || secrets.GITHUB_TOKEN }}
       with:
         script: |
           const { main } = require(process.env.GITHUB_ACTION_PATH + '/src/app.js');
           const dryRun = JSON.parse(process.env.DRY_RUN);
           const minimalVersion = parseInt(process.env.MININAL_VERSION);
+          const token = process.env.TOKEN;
 
-          main(process.env.WORKING_DIRECTORY, minimalVersion, !dryRun, null)
+          main(process.env.WORKING_DIRECTORY, minimalVersion, github.context, token, !dryRun)
             .then((response) => {
               if (response.succeeded) {
                 core.setOutput('response', JSON.stringify(response));
