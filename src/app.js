@@ -48,11 +48,13 @@ async function updateGitHubRelease(githubWrapper, releaseBranch, tag) {
 
   if (release != null) {
     if (release.target_commitish !== releaseBranch) {
+      logger.info(`Release for tag (${tag}) already exists but has incorrect target_commitish (${release.target_commitish}). Updating to ${releaseBranch}.`);
       await githubWrapper.updateTargetCommitish(release.id, releaseBranch);
     } else {
       logger.info(`Release for tag (${tag}) already exists and has correct target_commitish (${releaseBranch}).`);
     }
   } else {
+    logger.info(`Release for tag (${tag}) does not exist. Creating.`);
     await githubWrapper.createReleaseForTag(tag, releaseBranch);
   }
 }
@@ -108,14 +110,19 @@ async function main(repoPath, minimalVersion, context, token, doPush = true) {
       await gitWrapper.checkout(tag);
       await gitWrapper.createBranch(releaseBranch, tag);
 
+      logger.info(`Created release branch '${releaseBranch}' for tag (${tag}).`);
+
       if (doPush) {
+        logger.info(`Pushing release branch '${releaseBranch}' to remote.`);
         await gitWrapper.pushToRemote(releaseBranch);
+
+        // In order for "release-drafter" to update versions in order we have to make sure that the release points to the correct release branch.
+        // To achieve this we have to make sure that target_commitish is set to the release branch.
+        logger.info(`Updating 'target_commitish' in GitHub release for tag ${tag} if needed.`);
         await updateGitHubRelease(githubWrapper, releaseBranch, tag);
       }
 
       responseData[releaseBranch] = tag;
-
-      logger.info(`Created release branch '${releaseBranch}' for tag (${tag}).`);
     }
 
     if (Object.keys(responseData).length === 0) {
