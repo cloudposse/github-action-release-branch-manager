@@ -24,7 +24,7 @@ inputs:
   minimal-version:
     description: "Minimal 'major' version that release branch creation should start from"
     required: false
-    default: "1"
+    default: "0"
 outputs:
   response:
     description: 'Response in json format for example: {"succeeded":true,"reason":"CREATED_BRANCHES","message":"Successfully created release branches","data":{"release/v3":"3.1.0","release/v2":"2.0.0","release/v1":"1.1.0"}}'
