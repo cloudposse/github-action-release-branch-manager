@@ -17,6 +17,23 @@ function createRepoDir() {
   return repoPath;
 }
 
+function readFile(contextFile) {
+  return new Promise((resolve, reject) => {
+    fs.readFile(contextFile, 'utf8', (error, data) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(JSON.parse(data));
+      }
+    });
+  });
+}
+
+async function loadContext(contextFile) {
+  const github = await readFile(contextFile);
+  return github.context;
+}
+
 async function createFileAndCommit(gitWrapper, repoPath) {
   fs.writeFileSync(path.join(repoPath, uuidv4()), uuidv4());
   return await gitWrapper.commit();
@@ -32,7 +49,7 @@ test('no tags', async () => {
 
   // test
   logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
-  response = await main(repoPath, 0, false, GITHUB_EVENT_FILE);
+  response = await main(repoPath, 0, await loadContext(GITHUB_EVENT_FILE), null, false);
   logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
 
   // verify
@@ -55,7 +72,7 @@ test('only 0 level tags', async () => {
 
   // test
   logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
-  response = await main(repoPath, 0, false, GITHUB_EVENT_FILE);
+  response = await main(repoPath, 0, await loadContext(GITHUB_EVENT_FILE), null, false);
   logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
 
   // verify
@@ -78,7 +95,7 @@ test('only 1 level tags', async () => {
 
   // test
   logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
-  response = await main(repoPath, 0, false, GITHUB_EVENT_FILE);
+  response = await main(repoPath, 0, await loadContext(GITHUB_EVENT_FILE), null, false);
   logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
 
   // verify
@@ -111,7 +128,7 @@ test('release branches exist for all tags', async () => {
 
   // test
   logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
-  response = await main(repoPath, 0, false, GITHUB_EVENT_FILE);
+  response = await main(repoPath, 0, await loadContext(GITHUB_EVENT_FILE), null, false);
   logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
 
   // verify
@@ -137,7 +154,7 @@ test('create release branch for tag', async () => {
 
   // test
   logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
-  response = await main(repoPath, 0, false, GITHUB_EVENT_FILE);
+  response = await main(repoPath, 0, await loadContext(GITHUB_EVENT_FILE), null, false);
   logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
 
   // verify
@@ -174,7 +191,7 @@ test('create multiple release branches 1', async () => {
 
   // test
   logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
-  const response = await main(repoPath, 0, false, GITHUB_EVENT_FILE);
+  const response = await main(repoPath, 0, await loadContext(GITHUB_EVENT_FILE), null, false);
   logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
 
   logger.info(JSON.stringify(response));
@@ -218,7 +235,7 @@ test('create multiple release branches 2', async () => {
 
   // test
   logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
-  const response = await main(repoPath, 0, false, GITHUB_EVENT_FILE);
+  const response = await main(repoPath, 0, await loadContext(GITHUB_EVENT_FILE), null, false);
   logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
 
   // verify
@@ -253,7 +270,7 @@ test('minimal version is set', async () => {
 
   // test
   logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
-  const response = await main(repoPath, 2, false, GITHUB_EVENT_FILE);
+  const response = await main(repoPath, 2, await loadContext(GITHUB_EVENT_FILE), null, false);
   logger.debug(`State of repo:\n${await gitWrapper.getCurrentStateOfRepo()}`);
 
   logger.info(JSON.stringify(response));
