@@ -9,7 +9,7 @@
 | git-user-name | Git user name that will be used for git config | actions-bot | false |
 | log-level | Log level for this action. Available options: ['off', 'error', 'warn', 'info', 'debug']. Default 'info' | info | false |
 | minimal-version | Minimal 'major' version that release branch creation should start from | 0 | false |
-| token | GitHub Token used to perform git and GitHub operations | N/A | false |
+| token | GitHub Token used to perform git and GitHub operations | ${{ github.token }} | false |
 
 
 ## Outputs
