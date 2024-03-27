@@ -67,8 +67,8 @@ runs:
         WORKING_DIRECTORY: '${{ github.workspace }}'
         DRY_RUN: '${{ inputs.dry-run }}'
         MININAL_VERSION: '${{ inputs.minimal-version }}'
-        TOKEN: ${{ inputs.token }}
       with:
+        github-token: ${{ inputs.token }}      
         script: |
           const { main } = require(process.env.GITHUB_ACTION_PATH + '/src/app.js');
           const dryRun = JSON.parse(process.env.DRY_RUN);
