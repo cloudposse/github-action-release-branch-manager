@@ -67,6 +67,8 @@ runs:
         WORKING_DIRECTORY: '${{ github.workspace }}'
         DRY_RUN: '${{ inputs.dry-run }}'
         MININAL_VERSION: '${{ inputs.minimal-version }}'
+        ## Fix later to use conventional github-token
+        TOKEN: ${{ inputs.token }} 
       with:
         github-token: ${{ inputs.token }}      
         script: |
