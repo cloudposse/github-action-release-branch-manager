@@ -12,36 +12,31 @@ class GitWrapper {
   }
 
   async branchExists(branchName) {
-    try {
-      const { all: localBranches } = await this.git.branchLocal();
-      const existsLocally = localBranches.includes(branchName);
+    const { all: localBranches } = await this.git.branchLocal();
+    const existsLocally = localBranches.includes(branchName);
 
-      logger.debug(`Local branches:\n${Array.from(localBranches).join('\n')}`);
+    logger.debug(`Local branches:\n${Array.from(localBranches).join('\n')}`);
 
-      if (existsLocally) {
-        logger.debug(`Branch exist locally: ${branchName}`);
-        return true;
-      }
-
-      const { all: remoteBranches } = await this.git.branch();
-      const existsRemotely = remoteBranches.includes(`origin/${branchName}`) || remoteBranches.includes(`remotes/origin/${branchName}`);
-
-      logger.debug(`Remote branches:\n${Array.from(remoteBranches).join('\n')}`);
-
-      if (existsRemotely) {
-        logger.debug(`Branch exist remotelly: ${branchName}`);
-        return true;
-      }
-
-      if (!existsLocally && !existsRemotely) {
-        logger.debug(`Branch does not exist: ${branchName}`);
-      }
-
-      return existsRemotely;
-    } catch (err) {
-      logger.error(`Error checking if branch '${branchName}' exists:`, err);
-      return false;
+    if (existsLocally) {
+      logger.debug(`Branch exist locally: ${branchName}`);
+      return true;
     }
+
+    const { all: remoteBranches } = await this.git.branch();
+    const existsRemotely = remoteBranches.includes(`origin/${branchName}`) || remoteBranches.includes(`remotes/origin/${branchName}`);
+
+    logger.debug(`Remote branches:\n${Array.from(remoteBranches).join('\n')}`);
+
+    if (existsRemotely) {
+      logger.debug(`Branch exist remotelly: ${branchName}`);
+      return true;
+    }
+
+    if (!existsLocally && !existsRemotely) {
+      logger.debug(`Branch does not exist: ${branchName}`);
+    }
+
+    return existsRemotely;
   }
 
   async getSHAForTag(tag) {
